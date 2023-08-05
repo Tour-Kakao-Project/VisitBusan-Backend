@@ -8,14 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load ENV file
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(
-    env_file=os.path.join(BASE_DIR, '.env')
+    env_file=os.path.join(BASE_DIR, 'deploy/.env')
 )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0dy)!&1y(ud=zj5s!x_+^xo*90#@yefmk!p%v&y57%!y=xq8ff'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
