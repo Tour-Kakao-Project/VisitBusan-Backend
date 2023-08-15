@@ -20,7 +20,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [env('EC2_IP')]
+ALLOWED_HOSTS = [env('EC2_IP'), 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
