@@ -124,3 +124,23 @@ def save_kakao_member(kakao_access_token):
                                         oauth_provider=2)
         member.save()
     return member.get(), user
+
+class Visit_Busan_Login():
+    @api_view(['POST'])
+    @permission_classes([AllowAny])
+    def sign_up(request):
+        email = request.data["email"]
+        passwd = request.data["password"]
+        name = request.data["name"]
+        phone_number = request.data["phone_number"]
+        
+        # 1. Check the email
+        member = Member.objects.filter(email=str(email))
+        if member.exists():
+            return Response({"error_code": ErrorCode_404.DUPLICATED_EMAIL, "error_msg": "이미 존재하는 이메일입니다."},
+                        status=status.HTTP_404_NOT_FOUND)
+        
+        # 2. Check the password
+        
+        
+        # 3. Save
