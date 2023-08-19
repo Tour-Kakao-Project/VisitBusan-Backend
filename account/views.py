@@ -130,7 +130,7 @@ class Visit_Busan_Login():
     
     @api_view(['POST'])
     @permission_classes([AllowAny])
-    def sign_up(request):
+    def visit_busan_sign_up(request):
         email = request.data["email"]
         passwd = request.data["password"]
         name = request.data["name"]
@@ -184,6 +184,8 @@ class Visit_Busan_Login():
         member = member.get()
         member.refresh_token = jwt_token["refresh_token"]
         member.save()
+        
+        return Response({"email":member.email, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
         
         
 def save_member(email, name, oauth_provider_num, phone_number):
