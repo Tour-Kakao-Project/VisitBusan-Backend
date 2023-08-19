@@ -153,7 +153,7 @@ class Visit_Busan_Login():
                            status=status.HTTP_404_NOT_FOUND) 
         
         # 3. Save
-        save_member(email, name, 1, phone_number)
+        user, member = save_member(email, name, 1, phone_number)
             
         return Response({"email":member.email}, status=status.HTTP_200_OK)
     
