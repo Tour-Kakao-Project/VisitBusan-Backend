@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .model.Member import *
 from visit_busan.settings import env
 from visit_busan.utils.errors import *
+from visit_busan.utils.string_utils import *
 
 class KakaoLogin():
     
@@ -137,10 +138,41 @@ class Visit_Busan_Login():
         # 1. Check the email
         member = Member.objects.filter(email=str(email))
         if member.exists():
-            return Response({"error_code": ErrorCode_404.DUPLICATED_EMAIL, "error_msg": "이미 존재하는 이메일입니다."},
-                        status=status.HTTP_404_NOT_FOUND)
+            login_service = member.get().oauth_provider
+            if (login_service != '1'):
+                return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "다른 서비스로 가입이 되어 있는 계정입니다."},
+                           status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({"error_code": ErrorCode_404.DUPLICATED_EMAIL, "error_msg": "이미 존재하는 이메일입니다."},
+                           status=status.HTTP_404_NOT_FOUND)
         
         # 2. Check the password
-        
+        if (not check_passwd_rule(passwd)):
+            return Response({"error_code": ErrorCode_404.INVAILD_PASSED, "error_msg": "패스워드 형식이 올바르지 않습니다."},
+                           status=status.HTTP_404_NOT_FOUND) 
         
         # 3. Save
+        user, member = save_member(email, name, 1, phone_number)
+        
+        # 3. Get backend token
+        jwt_token = get_tokens_for_user(user)
+            
+        # 3. Save refresh token
+        member.refresh_token = jwt_token["refresh_token"]
+        member.save()
+            
+        return Response({"email":member.email, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
+        
+def save_member(email, name, oauth_provider_num, phone_number):
+    user = User.objects.create(username=str(email))
+    user.save()
+    
+    member = Member.objects.create(
+        user = user,
+        email = email,
+        first_name = name,
+        oauth_provider = oauth_provider_num,
+        phone_number = phone_number
+    )
+    member.save()
+    return user, member
