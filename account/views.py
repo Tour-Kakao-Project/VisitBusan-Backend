@@ -186,6 +186,27 @@ class Visit_Busan_Login():
         member.save()
         
         return Response({"email":member.email, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
+
+class GoogleLogin():
+    @api_view(['GET'])
+    @permission_classes([AllowAny])
+    def google_back_login(request):
+        google_client_id = env('GOOGLE_WEB_CLIENT_ID')
+        redirect_uri = env('GOOGLE_REDIRECT_URI')
+        response_type = 'code'
+        scope='https://www.googleapis.com/auth/userinfo.email'
+        
+        return redirect(
+            f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={redirect_uri}&scope={scope}&response_type={response_type}"
+        )
+    
+    @api_view(['GET'])
+    @permission_classes([AllowAny])
+    def google_back_login_redirect(request):
+        print("in----------------")
+        print(request.GET.get('code'))
+        
+        return Response({"email": "ok"}, status=status.HTTP_200_OK)
         
         
 def save_member(email, name, oauth_provider_num, phone_number):
