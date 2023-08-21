@@ -7,13 +7,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
 
 from .model.Member import *
 from visit_busan.settings import env
 from visit_busan.utils.errors import *
 from visit_busan.utils.string_utils import *
-
-class KakaoLogin():
+from visit_busan.exception.Custom404Exception import *
+class KakaoLogin(APIView):
     
     @api_view(['GET'])
     @permission_classes([AllowAny])
@@ -126,7 +127,7 @@ def save_kakao_member(kakao_access_token):
         member.save()
     return member.get(), user
 
-class Visit_Busan_Login():
+class Visit_Busan_Login(APIView):
     
     @api_view(['POST'])
     @permission_classes([AllowAny])
@@ -144,8 +145,7 @@ class Visit_Busan_Login():
                 return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "다른 서비스로 가입이 되어 있는 계정입니다."},
                            status=status.HTTP_404_NOT_FOUND)
             else:
-                return Response({"error_code": ErrorCode_404.DUPLICATED_EMAIL, "error_msg": "이미 존재하는 이메일입니다."},
-                           status=status.HTTP_404_NOT_FOUND)
+                raise Custom404Exception(ErrorCode_404.DUPLICATED_EMAIL )
         
         # 2. Check the password
         if (not check_passwd_rule(passwd)):
