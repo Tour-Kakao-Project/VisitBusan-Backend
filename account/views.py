@@ -234,6 +234,25 @@ class GoogleLogin():
         
         return Response({"email": member.email, "google_access_token": google_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
 
+    @api_view(['GET'])
+    @permission_classes([AllowAny])
+    def google_login(request):
+        try:
+            google_access_token = request.data["google_access_token"]
+            
+            # 1. Get user info
+            user, member = save_google_member(google_access_token)
+                
+            # 2. Get backend token
+            jwt_token = get_tokens_for_user(user)
+            
+            # 3. Save refresh token
+            member.refresh_token = jwt_token["refresh_token"]
+            member.save()
+            
+            return Response({"email":member.email, "google_access_token": google_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
+        except:
+            pass
         
 def save_member(email, name, oauth_provider_num, phone_number):
     user = User.objects.create(username=str(email))
