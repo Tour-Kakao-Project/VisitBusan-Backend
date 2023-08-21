@@ -194,7 +194,7 @@ class GoogleLogin():
         google_client_id = env('GOOGLE_WEB_CLIENT_ID')
         redirect_uri = env('GOOGLE_REDIRECT_URI')
         response_type = 'code'
-        scope='https://www.googleapis.com/auth/userinfo.email'
+        scope='email profile'
         
         return redirect(
             f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={redirect_uri}&scope={scope}&response_type={response_type}"
@@ -203,11 +203,37 @@ class GoogleLogin():
     @api_view(['GET'])
     @permission_classes([AllowAny])
     def google_back_login_redirect(request):
-        print("in----------------")
-        print(request.GET.get('code'))
+        # 1. Get access token
+        code = request.GET.get('code')
+        headers = {
+            'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        }
+        data = {
+            'grant_type': 'authorization_code',
+            'client_id': env('GOOGLE_WEB_CLIENT_ID'),
+            'client_secret': env('GOOGLE_WEB_SECRET_KEY'),
+            'redirect_uri': env('GOOGLE_REDIRECT_URI'),
+            'code': code,
+            'state': env('GOOGLE_STATE')
+        }
+
+        url = 'https://oauth2.googleapis.com/token'
+
+        token_req = requests.post(url, headers=headers, data=data)
+        token_req_json = token_req.json()
+        google_access_token = token_req_json.get("access_token")
         
-        return Response({"email": "ok"}, status=status.HTTP_200_OK)
+        # 2. Get user info
+        user, member = save_google_member(google_access_token)
         
+        # 3. Get backend token
+        jwt_token = get_tokens_for_user(user)
+        
+        # 4. Save refresh token
+        member.refresh_token = jwt_token["refresh_token"]
+        
+        return Response({"email": member.email, "google_access_token": google_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
+
         
 def save_member(email, name, oauth_provider_num, phone_number):
     user = User.objects.create(username=str(email))
@@ -221,4 +247,40 @@ def save_member(email, name, oauth_provider_num, phone_number):
         phone_number = phone_number
     )
     member.save()
+    return user, member
+
+def save_google_member(google_access_token):
+    google_api_response = requests.get(
+            "https://www.googleapis.com/userinfo/v2/me",
+            headers={
+                "Authorization": f"Bearer {google_access_token}",
+                "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+            },
+        )
+        
+    google_api_response = google_api_response.json()
+    
+    email = google_api_response['email']
+    name = google_api_response['name']
+    given_name = google_api_response['given_name']
+    
+    member = Member.objects.filter(email=str(email))
+    if member.exists():
+        member = member.get()
+        login_service = member.oauth_provider
+        if (login_service != '3'):
+            return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "회원가입 이력이 있는 이메일입니다."},
+                status=status.HTTP_404_NOT_FOUND)
+        
+        user = User.objects.get(username=str(email))
+    else:
+        user = User.objects.create(username=str(email))
+        user.save()
+        member = Member.objects.create(user=user,
+                                        email=email,
+                                        first_name=name,
+                                        last_name=given_name,
+                                        oauth_provider=3)
+        member.save()
+        
     return user, member
