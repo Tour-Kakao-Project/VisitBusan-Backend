@@ -7,42 +7,44 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
 
 from .model.Member import *
 from visit_busan.settings import env
 from visit_busan.utils.errors import *
 from visit_busan.utils.string_utils import *
+from visit_busan.exception.Custom404Exception import *
 
-class KakaoLogin():
-    
-    @api_view(['GET'])
+
+class KakaoLogin(APIView):
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def kakao_back_login(request):
-        client_id = env('KAKAO_CLIENT_ID')
-        redirect_uri = env('KAKAO_REDIRECT_URI')
+        client_id = env("KAKAO_CLIENT_ID")
+        redirect_uri = env("KAKAO_REDIRECT_URI")
         response_type = "code"
 
         return redirect(
             f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type={response_type}"
         )
-    
-    @api_view(['GET'])
+
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def kakao_back_login_redirect(request):
         # 1. Get Access token
-        code = request.GET.get('code', None)
+        code = request.GET.get("code", None)
 
         headers = {
-            'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
         }
         data = {
-            'grant_type': 'authorization_code',
-            'client_id': env('KAKAO_CLIENT_ID'),
-            'redirect_uri': env('KAKAO_REDIRECT_URI'),
-            'code': code
+            "grant_type": "authorization_code",
+            "client_id": env("KAKAO_CLIENT_ID"),
+            "redirect_uri": env("KAKAO_REDIRECT_URI"),
+            "code": code,
         }
 
-        url = 'https://kauth.kakao.com/oauth/token'
+        url = "https://kauth.kakao.com/oauth/token"
 
         token_req = requests.post(url, headers=headers, data=data)
         token_req_json = token_req.json()
@@ -51,43 +53,59 @@ class KakaoLogin():
 
         # 2. Get user info
         member, user = save_kakao_member(kakao_access_token)
-            
+
         # 3. Get backend token
         jwt_token = get_tokens_for_user(user)
-        
+
         # 4. Save refresh token
         member.refresh_token = jwt_token["refresh_token"]
         member.save()
-        
-        return Response({"email":member.email, "kakao_access_token": kakao_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
-    
-    @api_view(['GET'])
+
+        return Response(
+            {
+                "email": member.email,
+                "kakao_access_token": kakao_access_token,
+                "jwt_token": jwt_token,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def kakao_login(request):
         try:
             kakao_access_token = request.data["kakao_access_token"]
-            
+
             # 1. Get user info
             member, user = save_kakao_member(kakao_access_token)
-                
+
             # 2. Get backend token
             jwt_token = get_tokens_for_user(user)
-            
+
             # 3. Save refresh token
             member.refresh_token = jwt_token["refresh_token"]
             member.save()
-            
-            return Response({"email":member.email, "kakao_access_token": kakao_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
+
+            return Response(
+                {
+                    "email": member.email,
+                    "kakao_access_token": kakao_access_token,
+                    "jwt_token": jwt_token,
+                },
+                status=status.HTTP_200_OK,
+            )
         except:
             pass
-    
+
+
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
 
     return {
-        'access_token': str(refresh.access_token),  # access_token 호출
-        'refresh_token': str(refresh)
+        "access_token": str(refresh.access_token),  # access_token 호출
+        "refresh_token": str(refresh),
     }
+
 
 def save_kakao_member(kakao_access_token):
     kakao_api_response = requests.post(
@@ -97,209 +115,221 @@ def save_kakao_member(kakao_access_token):
             "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
         },
     )
-    
+
     kakao_api_response = kakao_api_response.json()
-    
+
     nickname = kakao_api_response["properties"]["nickname"]
     has_email = kakao_api_response["kakao_account"]["has_email"]
     if has_email:
         email = kakao_api_response["kakao_account"]["email"]
     else:
-        return Response({"error_code": ErrorCode_404.NOT_AGREE_EMAIL, "error_msg": "이메일을 동의하지 않았습니다."},
-                        status=status.HTTP_404_NOT_FOUND)
-        
+        raise Custom404Exception(ErrorCode_404.NOT_AGREE_EMAIL)
+
     member = Member.objects.filter(email=str(email))
     if member.exists():
         login_service = member.get().oauth_provider
-        if (login_service != '2'):
-            return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "회원가입 이력이 있는 이메일입니다."},
-                status=status.HTTP_404_NOT_FOUND)
-        
+        if login_service != "2":
+            raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+
         user = User.objects.get(username=str(email))
     else:
         user = User.objects.create(username=str(email))
         user.save()
-        member = Member.objects.create(user=user,
-                                        email=email,
-                                        first_name=nickname,
-                                        oauth_provider=2)
+        member = Member.objects.create(
+            user=user, email=email, first_name=nickname, oauth_provider=2
+        )
         member.save()
     return member.get(), user
 
-class Visit_Busan_Login():
-    
-    @api_view(['POST'])
+
+class Visit_Busan_Login(APIView):
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_sign_up(request):
         email = request.data["email"]
         passwd = request.data["password"]
         name = request.data["name"]
         phone_number = request.data["phone_number"]
-        
+
         # 1. Check the email
         member = Member.objects.filter(email=str(email))
         if member.exists():
             login_service = member.get().oauth_provider
-            if (login_service != '1'):
-                return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "다른 서비스로 가입이 되어 있는 계정입니다."},
-                           status=status.HTTP_404_NOT_FOUND)
+            if login_service != "1":
+                raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
             else:
-                return Response({"error_code": ErrorCode_404.DUPLICATED_EMAIL, "error_msg": "이미 존재하는 이메일입니다."},
-                           status=status.HTTP_404_NOT_FOUND)
-        
+                raise Custom404Exception(ErrorCode_404.DUPLICATED_EMAIL)
+
         # 2. Check the password
-        if (not check_passwd_rule(passwd)):
-            return Response({"error_code": ErrorCode_404.INVAILD_PASSED, "error_msg": "패스워드 형식이 올바르지 않습니다."},
-                           status=status.HTTP_404_NOT_FOUND) 
-        
+        if not check_passwd_rule(passwd):
+            raise Custom404Exception(ErrorCode_404.INVAILD_PASSED)
+
         # 3. Save
         user, member = save_member(email, name, 1, phone_number)
-            
-        return Response({"email":member.email}, status=status.HTTP_200_OK)
-    
-    @api_view(['GET'])
+
+        return Response({"email": member.email}, status=status.HTTP_200_OK)
+
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def visit_busan_login(request):
-        email = request.data['email']
-        passwd = request.data['password']
-        
+        email = request.data["email"]
+        passwd = request.data["password"]
+
         # 1. Check the email
         member = Member.objects.filter(email=str(email))
         if member.exists():
             login_service = member.get().oauth_provider
-            if (login_service != '1'):
-                return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "다른 서비스로 가입이 되어 있는 계정입니다."},
-                           status=status.HTTP_404_NOT_FOUND)
-        
+            if login_service != "1":
+                raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+
         # 2. Check the password
-        if (not check_passwd_rule(passwd)):
-            return Response({"error_code": ErrorCode_404.INVAILD_PASSED, "error_msg": "패스워드 형식이 올바르지 않습니다."},
-                           status=status.HTTP_404_NOT_FOUND)
-                
+        if not check_passwd_rule(passwd):
+            raise Custom404Exception(ErrorCode_404.INVAILD_PASSED)
+
         # 2. Get backend token
         user = User.objects.get(username=str(email))
         jwt_token = get_tokens_for_user(user)
-        
+
         # 3. Save refresh token
         member = member.get()
         member.refresh_token = jwt_token["refresh_token"]
         member.save()
-        
-        return Response({"email":member.email, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
 
-class GoogleLogin():
-    @api_view(['GET'])
+        return Response(
+            {"email": member.email, "jwt_token": jwt_token}, status=status.HTTP_200_OK
+        )
+
+
+class GoogleLogin:
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def google_back_login(request):
-        google_client_id = env('GOOGLE_WEB_CLIENT_ID')
-        redirect_uri = env('GOOGLE_REDIRECT_URI')
-        response_type = 'code'
-        scope='email profile'
-        
+        google_client_id = env("GOOGLE_WEB_CLIENT_ID")
+        redirect_uri = env("GOOGLE_REDIRECT_URI")
+        response_type = "code"
+        scope = "email profile"
+
         return redirect(
             f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={redirect_uri}&scope={scope}&response_type={response_type}"
         )
-    
-    @api_view(['GET'])
+
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def google_back_login_redirect(request):
         # 1. Get access token
-        code = request.GET.get('code')
+        code = request.GET.get("code")
         headers = {
-            'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
         }
         data = {
-            'grant_type': 'authorization_code',
-            'client_id': env('GOOGLE_WEB_CLIENT_ID'),
-            'client_secret': env('GOOGLE_WEB_SECRET_KEY'),
-            'redirect_uri': env('GOOGLE_REDIRECT_URI'),
-            'code': code,
-            'state': env('GOOGLE_STATE')
+            "grant_type": "authorization_code",
+            "client_id": env("GOOGLE_WEB_CLIENT_ID"),
+            "client_secret": env("GOOGLE_WEB_SECRET_KEY"),
+            "redirect_uri": env("GOOGLE_REDIRECT_URI"),
+            "code": code,
+            "state": env("GOOGLE_STATE"),
         }
 
-        url = 'https://oauth2.googleapis.com/token'
+        url = "https://oauth2.googleapis.com/token"
 
         token_req = requests.post(url, headers=headers, data=data)
         token_req_json = token_req.json()
         google_access_token = token_req_json.get("access_token")
-        
+
         # 2. Get user info
         user, member = save_google_member(google_access_token)
-        
+
         # 3. Get backend token
         jwt_token = get_tokens_for_user(user)
-        
+
         # 4. Save refresh token
         member.refresh_token = jwt_token["refresh_token"]
-        
-        return Response({"email": member.email, "google_access_token": google_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
 
-    @api_view(['GET'])
+        return Response(
+            {
+                "email": member.email,
+                "google_access_token": google_access_token,
+                "jwt_token": jwt_token,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @api_view(["GET"])
     @permission_classes([AllowAny])
     def google_login(request):
         try:
             google_access_token = request.data["google_access_token"]
-            
+
             # 1. Get user info
             user, member = save_google_member(google_access_token)
-                
+
             # 2. Get backend token
             jwt_token = get_tokens_for_user(user)
-            
+
             # 3. Save refresh token
             member.refresh_token = jwt_token["refresh_token"]
             member.save()
-            
-            return Response({"email":member.email, "google_access_token": google_access_token, "jwt_token":jwt_token}, status=status.HTTP_200_OK)
+
+            return Response(
+                {
+                    "email": member.email,
+                    "google_access_token": google_access_token,
+                    "jwt_token": jwt_token,
+                },
+                status=status.HTTP_200_OK,
+            )
         except:
             pass
-        
+
+
 def save_member(email, name, oauth_provider_num, phone_number):
     user = User.objects.create(username=str(email))
     user.save()
-    
+
     member = Member.objects.create(
-        user = user,
-        email = email,
-        first_name = name,
-        oauth_provider = oauth_provider_num,
-        phone_number = phone_number
+        user=user,
+        email=email,
+        first_name=name,
+        oauth_provider=oauth_provider_num,
+        phone_number=phone_number,
     )
     member.save()
     return user, member
 
+
 def save_google_member(google_access_token):
     google_api_response = requests.get(
-            "https://www.googleapis.com/userinfo/v2/me",
-            headers={
-                "Authorization": f"Bearer {google_access_token}",
-                "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
-            },
-        )
-        
+        "https://www.googleapis.com/userinfo/v2/me",
+        headers={
+            "Authorization": f"Bearer {google_access_token}",
+            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+    )
+
     google_api_response = google_api_response.json()
-    
-    email = google_api_response['email']
-    name = google_api_response['name']
-    given_name = google_api_response['given_name']
-    
+
+    email = google_api_response["email"]
+    name = google_api_response["name"]
+    given_name = google_api_response["given_name"]
+
     member = Member.objects.filter(email=str(email))
     if member.exists():
         member = member.get()
         login_service = member.oauth_provider
-        if (login_service != '3'):
-            return Response({"error_code": ErrorCode_404.ALREADY_SIGN_IN, "error_msg": "회원가입 이력이 있는 이메일입니다."},
-                status=status.HTTP_404_NOT_FOUND)
-        
+        if login_service != "3":
+            raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+
         user = User.objects.get(username=str(email))
     else:
         user = User.objects.create(username=str(email))
         user.save()
-        member = Member.objects.create(user=user,
-                                        email=email,
-                                        first_name=name,
-                                        last_name=given_name,
-                                        oauth_provider=3)
+        member = Member.objects.create(
+            user=user,
+            email=email,
+            first_name=name,
+            last_name=given_name,
+            oauth_provider=3,
+        )
         member.save()
-        
+
     return user, member
