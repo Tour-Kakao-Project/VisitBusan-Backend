@@ -10,19 +10,7 @@ class Custom404Exception(APIException):
     
     def __init__ (self, error_code, error_detail=""):
         self.detail = {
-            "code": error_code.value,
+            "error_code": error_code.value[0],
+            "error_msg" : error_code.value[1],
             "error_detail": error_detail
         }
-        
-
-def custom_404_exception(exc, context):
-    response = exception_handler(exc, context)
-
-    if response is not None:
-        response.data['error_code'] = response.data['code'][0]
-        response.data['error_msg'] = response.data['code'][1]
-        response.data['error_detail'] = response.data['error_detail']
-        
-    del response.data['code']
-
-    return response
