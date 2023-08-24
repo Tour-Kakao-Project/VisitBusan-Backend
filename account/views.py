@@ -333,3 +333,21 @@ def save_google_member(google_access_token):
         member.save()
 
     return user, member
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def check_duplicated_email(request):
+    email = request.data["email"]
+
+    member = Member.objects.filter(email=str(email))
+    if member.exists():
+        raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+    else:
+        return Response(
+            {
+                "email": email,
+                "msg": "사용할 수 있는 이메일 입니다.",
+            },
+            status=status.HTTP_200_OK,
+        )
