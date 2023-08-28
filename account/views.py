@@ -148,7 +148,8 @@ class Visit_Busan_Login(APIView):
     def visit_busan_sign_up(request):
         email = request.data["email"]
         passwd = request.data["password"]
-        name = request.data["name"]
+        first_name = request.data["first_name"]
+        last_name = request.data["last_name"]
         phone_number = request.data["phone_number"]
 
         # 1. Check the email
@@ -165,7 +166,7 @@ class Visit_Busan_Login(APIView):
             raise Custom404Exception(ErrorCode_404.INVAILD_PASSED)
 
         # 3. Save
-        user, member = save_member(email, name, 1, phone_number)
+        user, member = save_member(email, first_name, last_name, 1, phone_number)
 
         return Response({"email": member.email}, status=status.HTTP_200_OK)
 
@@ -282,14 +283,15 @@ class GoogleLogin:
             pass
 
 
-def save_member(email, name, oauth_provider_num, phone_number):
+def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
     user = User.objects.create(username=str(email))
     user.save()
 
     member = Member.objects.create(
         user=user,
         email=email,
-        first_name=name,
+        first_name=first_name,
+        last_name=last_name,
         oauth_provider=oauth_provider_num,
         phone_number=phone_number,
     )
