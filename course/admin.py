@@ -1,3 +1,12 @@
 from django.contrib import admin
+from course.model.index import *
 
-# Register your models here.
+
+@admin.register(Course)
+class MemberAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Course._meta.get_fields()]
+
+
+@admin.register(CourseStyle)
+class MemberAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in CourseStyle._meta.get_fields()]
