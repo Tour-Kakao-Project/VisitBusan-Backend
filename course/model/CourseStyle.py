@@ -34,11 +34,14 @@ class CourseStyle(models.Model):
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
-    schedule_style = models.CharField(max_length=50, choices=SCHEDULE_STYLE)
-    activity_style = models.CharField(max_length=50, choices=ACTIVITY_STYLE)
-    accommodation_style = models.CharField(max_length=50, choices=ACCOMMODATION_STYLE)
-    attraction_style = models.CharField(max_length=50, choices=ATTRACTION_STYLE)
-    travel_keyword = models.CharField(max_length=50, choices=TRAVEL_KEYWORD)
+    choice_data = models.JSONField(null=True)  # 선택지 데이터
+
+    # schedule_style = models.CharField(max_length=50, choices=SCHEDULE_STYLE)
+    # activity_style = models.CharField(max_length=50, choices=ACTIVITY_STYLE)
+    # accommodation_style = models.CharField(max_length=50, choices=ACCOMMODATION_STYLE)
+    # attraction_style = models.CharField(max_length=50, choices=ATTRACTION_STYLE)
+    # travel_keyword = models.CharField(max_length=50, choices=TRAVEL_KEYWORD)
+
     start_date = models.DateField()
     end_date = models.DateField()
-    place = models.JSONField(null=True)
+    place = models.JSONField(null=True)  # 사용자가 가고자 하는 장소 list
