@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from .model.Member import *
 from visit_busan.settings import env
-from visit_busan.utils.errors import *
+from visit_busan.enum.index import *
 from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom404Exception import *
 
