@@ -35,12 +35,17 @@ class CourseStyle(models.Model):
     updated_at = models.DateField(auto_now=True)
 
     choice_data = models.JSONField(null=True)  # 선택지 데이터
-
-    # schedule_style = models.CharField(max_length=50, choices=SCHEDULE_STYLE)
-    # activity_style = models.CharField(max_length=50, choices=ACTIVITY_STYLE)
-    # accommodation_style = models.CharField(max_length=50, choices=ACCOMMODATION_STYLE)
-    # attraction_style = models.CharField(max_length=50, choices=ATTRACTION_STYLE)
-    # travel_keyword = models.CharField(max_length=50, choices=TRAVEL_KEYWORD)
+    """
+    ages: "",
+    disablity: "yes/no",
+    total_people_cnt: int,
+    schedule: "",
+    activity: "",
+    food: "",
+    accommodation: "",
+    attration: "",
+    keyword: ""
+    """
 
     start_date = models.DateField()
     end_date = models.DateField()
