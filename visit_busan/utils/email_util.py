@@ -2,7 +2,7 @@ from django.core.mail import EmailMessage
 
 import random
 
-from account.cache.save_authorized_code import save_authorized_code
+from account.cache.authorized_code import save_authorized_code
 
 RANDOM_CONDE_LENGTH = 4
 

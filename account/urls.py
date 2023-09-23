@@ -18,6 +18,7 @@ urlpatterns = [
     # sign up
     path("sign-up", views.Visit_Busan_Login.visit_busan_sign_up),
     path("sign-up/duplicated-email", views.check_duplicated_email),
+    path("authorize", views.check_authentication_code),
     # test
     path("email", views.test_email),
 ]

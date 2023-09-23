@@ -15,6 +15,7 @@ from visit_busan.enum.index import *
 from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom404Exception import *
 from visit_busan.utils.email_util import send_sign_up_email
+from account.cache.authorized_code import authorize_code
 
 
 class KakaoLogin(APIView):
@@ -137,7 +138,11 @@ def save_kakao_member(kakao_access_token):
         user = User.objects.create(username=str(email))
         user.save()
         member = Member.objects.create(
-            user=user, email=email, first_name=nickname, oauth_provider=2
+            user=user,
+            email=email,
+            first_name=nickname,
+            oauth_provider=2,
+            is_authorized=True,
         )
         member.save()
     return member.get(), user
@@ -295,6 +300,7 @@ def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
         last_name=last_name,
         oauth_provider=oauth_provider_num,
         phone_number=phone_number,
+        is_authorized=False,
     )
     member.save()
     return user, member
@@ -332,6 +338,7 @@ def save_google_member(google_access_token):
             first_name=name,
             last_name=given_name,
             oauth_provider=3,
+            is_authorized=True,
         )
         member.save()
 
@@ -356,6 +363,23 @@ def check_duplicated_email(request):
         )
 
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def check_authentication_code(request):
+    email = request.data["email"]
+    code = request.data["authentication_code"]
+
+    result = authorize_code(code, email)
+    if result == True:
+        member = find_member_by_email(email)
+        member.is_authorized = 1
+        member.save()
+
+        return Response(
+            {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
+        )
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def test_email(request):
@@ -364,3 +388,11 @@ def test_email(request):
         {"result": "ㅏ"},
         status=status.HTTP_200_OK,
     )
+
+
+def find_member_by_email(email):
+    member = User.objects.filter(email=str(email))
+    if member.exists():
+        return member.get()
+    else:
+        raise Custom404Exception(ErrorCode_404.NOT_EXIST_EMAIL)
