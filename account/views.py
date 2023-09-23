@@ -174,6 +174,9 @@ class Visit_Busan_Login(APIView):
         # 3. Save
         user, member = save_member(email, first_name, last_name, 1, phone_number)
 
+        # 4. Send email
+        send_sign_up_email(member.email)
+
         return Response({"email": member.email}, status=status.HTTP_200_OK)
 
     @api_view(["GET"])
@@ -369,9 +372,10 @@ def check_authentication_code(request):
     email = request.data["email"]
     code = request.data["authentication_code"]
 
+    member = find_member_by_email(email)
+
     result = authorize_code(code, email)
     if result == True:
-        member = find_member_by_email(email)
         member.is_authorized = 1
         member.save()
 
@@ -380,18 +384,8 @@ def check_authentication_code(request):
         )
 
 
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def test_email(request):
-    send_sign_up_email("lchy0413@gmail.com")
-    return Response(
-        {"result": "ㅏ"},
-        status=status.HTTP_200_OK,
-    )
-
-
 def find_member_by_email(email):
-    member = User.objects.filter(email=str(email))
+    member = Member.objects.filter(email=str(email))
     if member.exists():
         return member.get()
     else:
