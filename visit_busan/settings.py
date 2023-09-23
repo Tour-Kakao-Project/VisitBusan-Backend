@@ -67,7 +67,6 @@ WSGI_APPLICATION = "visit_busan.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     "default": {
@@ -78,12 +77,21 @@ DATABASES = {
         "HOST": env("LOCAL_DB_HOST"),
         "PORT": "3306",
         "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+    },
+}
+
+CACHE = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f'redis://{env("LOCAL_REDIS_HOST")}:{env("LOCAL_REDIS_PORT")}',
+        "OPTION": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
     }
 }
 
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,3 +146,11 @@ SIMPLE_JWT = {
     "SIGNING_KEY": env("DJANGO_SECRET_KEY"),
     "ALGORITHM": "HS256",
 }
+
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.googlemail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = env("VISITBUSAN_EMAIL")
+EMAIL_HOST_PASSWORD = env("VISITBUSAN_EMAIL_PASSWD")
