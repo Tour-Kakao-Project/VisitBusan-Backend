@@ -14,6 +14,7 @@ from visit_busan.settings import env
 from visit_busan.enum.index import *
 from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom404Exception import *
+from visit_busan.utils.email_util import send_sign_up_email
 
 
 class KakaoLogin(APIView):
@@ -353,3 +354,13 @@ def check_duplicated_email(request):
             },
             status=status.HTTP_200_OK,
         )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_email(request):
+    send_sign_up_email("lchy0413@gmail.com")
+    return Response(
+        {"result": "ㅏ"},
+        status=status.HTTP_200_OK,
+    )
