@@ -13,7 +13,7 @@ from .model.Member import *
 from visit_busan.settings import env
 from visit_busan.enum.index import *
 from visit_busan.utils.string_utils import *
-from visit_busan.exception.Custom404Exception import *
+from visit_busan.exception.Custom400Exception import *
 from visit_busan.utils.email_util import send_sign_up_email
 from account.cache.authorized_code import authorize_code
 
@@ -125,13 +125,13 @@ def save_kakao_member(kakao_access_token):
     if has_email:
         email = kakao_api_response["kakao_account"]["email"]
     else:
-        raise Custom404Exception(ErrorCode_404.NOT_AGREE_EMAIL)
+        raise Custom400Exception(ErrorCode_400.NOT_AGREE_EMAIL)
 
     member = Member.objects.filter(email=str(email))
     if member.exists():
         login_service = member.get().oauth_provider
         if login_service != "2":
-            raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+            raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
 
         user = User.objects.get(username=str(email))
     else:
@@ -163,13 +163,13 @@ class Visit_Busan_Login(APIView):
         if member.exists():
             login_service = member.get().oauth_provider
             if login_service != "1":
-                raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+                raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
             else:
-                raise Custom404Exception(ErrorCode_404.DUPLICATED_EMAIL)
+                raise Custom400Exception(ErrorCode_400.DUPLICATED_EMAIL)
 
         # 2. Check the password
         if not check_passwd_rule(passwd):
-            raise Custom404Exception(ErrorCode_404.INVAILD_PASSED)
+            raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
         # 3. Save
         user, member = save_member(email, first_name, last_name, 1, phone_number)
@@ -187,11 +187,11 @@ class Visit_Busan_Login(APIView):
         if member.exists():
             login_service = member.get().oauth_provider
             if login_service != "1":
-                raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+                raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
 
         # 2. Check the password
         if not check_passwd_rule(passwd):
-            raise Custom404Exception(ErrorCode_404.INVAILD_PASSED)
+            raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
         # 2. Get backend token
         user = User.objects.get(username=str(email))
@@ -326,7 +326,7 @@ def save_google_member(google_access_token):
         member = member.get()
         login_service = member.oauth_provider
         if login_service != "3":
-            raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+            raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
 
         user = User.objects.get(username=str(email))
     else:
@@ -352,7 +352,7 @@ def check_duplicated_email(request):
 
     member = Member.objects.filter(email=str(email))
     if member.exists():
-        raise Custom404Exception(ErrorCode_404.ALREADY_SIGN_IN)
+        raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
     else:
         return Response(
             {
@@ -395,4 +395,4 @@ def find_member_by_email(email):
     if member.exists():
         return member.get()
     else:
-        raise Custom404Exception(ErrorCode_404.NOT_EXIST_EMAIL)
+        raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
