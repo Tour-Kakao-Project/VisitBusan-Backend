@@ -269,6 +269,7 @@ class GoogleLogin:
     @permission_classes([AllowAny])
     def google_login(request):
         try:
+            print(request.json())
             google_access_token = request.data["google_access_token"]
 
             # 1. Get user info
@@ -289,8 +290,8 @@ class GoogleLogin:
                 },
                 status=status.HTTP_200_OK,
             )
-        except:
-            pass
+        except e:
+            print(e)
 
 
 def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
