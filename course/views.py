@@ -57,5 +57,5 @@ class CourseResult(APIView):
             return Response(
                 {"data": CourseSerializers(course).data}, status=status.HTTP_200_OK
             )
-        except exception:
-            print(exception)
+        except Exception as e:
+            print(e)

@@ -158,8 +158,6 @@ class Visit_Busan_Login(APIView):
         passwd = request.data["password"]
         first_name = request.data["first_name"]
         last_name = request.data["last_name"]
-        # phone_number = request.data["phone_number"]
-        phone_number = "010-1234-1234"
 
         # 1. Check the email
         member = Member.objects.filter(email=str(email))
@@ -175,7 +173,7 @@ class Visit_Busan_Login(APIView):
             raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
         # 3. Save
-        user, member = save_member(email, first_name, last_name, 1, phone_number)
+        user, member = save_member(email, first_name, last_name, 1)
 
         # 4. Send email
         send_sign_up_email(member.email)
@@ -297,7 +295,7 @@ class GoogleLogin:
             print(e)
 
 
-def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
+def save_member(email, first_name, last_name, oauth_provider_num):
     user = User.objects.create(username=str(email))
     user.save()
 
@@ -307,7 +305,6 @@ def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
         first_name=first_name,
         last_name=last_name,
         oauth_provider=oauth_provider_num,
-        phone_number=phone_number,
         is_authorized=False,
     )
     member.save()
