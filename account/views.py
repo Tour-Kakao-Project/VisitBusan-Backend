@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 
 import requests
+import random
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -15,7 +16,7 @@ from visit_busan.enum.index import *
 from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom400Exception import *
 from visit_busan.utils.email_util import send_sign_up_email
-from account.cache.authorized_code import authorize_code
+from account.cache.authorized_code import *
 
 
 class KakaoLogin(APIView):
@@ -382,6 +383,19 @@ def check_authentication_code(request):
         return Response(
             {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
         )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def reissue_authentication_code(request):
+    email = request.data["email"]
+    authorized_code = random.randrange(1000, 10000)
+
+    save_authorized_code(authorized_code, email)
+
+    return Response(
+        {"email": authorized_code, "result": "Success"}, status=status.HTTP_200_OK
+    )
 
 
 def find_member_by_email(email):
