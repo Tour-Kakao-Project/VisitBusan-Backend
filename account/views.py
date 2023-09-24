@@ -153,7 +153,7 @@ class Visit_Busan_Login(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_sign_up(request):
-        print(request.json())
+        print(request.data)
         email = request.data["email"]
         passwd = request.data["password"]
         first_name = request.data["first_name"]
