@@ -14,6 +14,8 @@ from .model.index import *
 from .service.index import *
 from .serializers import *
 
+from course.service.google_api.google_place_api import *
+
 
 class CourseResult(APIView):
     @api_view(["POST"])
@@ -57,5 +59,26 @@ class CourseResult(APIView):
             return Response(
                 {"data": CourseSerializers(course).data}, status=status.HTTP_200_OK
             )
-        except exception:
-            print(exception)
+        except Exception as e:
+            print(e)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_google(request):
+    address = "부산광역시 해운대구 중동 산 3-9"
+    result = get_place_id("129.196262235317", "35.1641953523606", "청사포 다릿돌전망대")
+    place_id = result["results"][0]["place_id"]
+    return Response({"result": place_id}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_detail(request):
+    place_id = "ChIJUQsDVhuNaDURJo5GeByloeQ"
+    result = get_place_detail(place_id)
+    location_result = result["result"]
+    location_rating = location_result["rating"]
+    location_url = location_result["url"]
+    location_user_ratings_total = location_result["user_ratings_total"]
+    return Response({"result": location_result}, status=status.HTTP_200_OK)
