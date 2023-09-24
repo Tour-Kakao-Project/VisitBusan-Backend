@@ -152,11 +152,13 @@ class Visit_Busan_Login(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_sign_up(request):
+        print(request.json())
         email = request.data["email"]
         passwd = request.data["password"]
         first_name = request.data["first_name"]
         last_name = request.data["last_name"]
-        phone_number = request.data["phone_number"]
+        # phone_number = request.data["phone_number"]
+        phone_number = "010-1234-1234"
 
         # 1. Check the email
         member = Member.objects.filter(email=str(email))
