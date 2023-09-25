@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 import requests
 import random
@@ -17,6 +17,10 @@ from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom400Exception import *
 from visit_busan.utils.email_util import send_sign_up_email
 from account.cache.authorized_code import *
+from account.service.google_api.google_oauth_api import (
+    get_google_user_info_from_access_token,
+    get_google_user_info_from_id_token,
+)
 
 
 class KakaoLogin(APIView):
@@ -73,7 +77,7 @@ class KakaoLogin(APIView):
             status=status.HTTP_200_OK,
         )
 
-    @api_view(["GET"])
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def kakao_login(request):
         try:
@@ -253,9 +257,12 @@ class GoogleLogin:
         token_req = requests.post(url, headers=headers, data=data)
         token_req_json = token_req.json()
         google_access_token = token_req_json.get("access_token")
+        email, given_name, family_name = get_google_user_info_from_access_token(
+            google_access_token
+        )
 
         # 2. Get user info
-        user, member = save_google_member(google_access_token)
+        user, member = save_google_member(email, given_name, family_name)
 
         # 3. Get backend token
         jwt_token = get_tokens_for_user(user)
@@ -278,10 +285,13 @@ class GoogleLogin:
         try:
             print("google_login")
             print(request.data)
-            google_access_token = request.data["google_access_token"]
+            google_id_token = request.data["google_id_token"]
+            email, given_name, family_name = get_google_user_info_from_id_token(
+                google_id_token
+            )
 
             # 1. Get user info
-            user, member = save_google_member(google_access_token)
+            user, member = save_google_member(email, given_name, family_name)
 
             # 2. Get backend token
             jwt_token = get_tokens_for_user(user)
@@ -293,13 +303,19 @@ class GoogleLogin:
             return Response(
                 {
                     "email": member.email,
-                    "google_access_token": google_access_token,
+                    "google_id_token": google_id_token,
                     "jwt_token": jwt_token,
                 },
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            print(e)
+            JsonResponse(
+                {
+                    "error": str(e),
+                    "error_args": e.args,
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 def save_member(email, first_name, last_name, oauth_provider_num):
@@ -318,21 +334,7 @@ def save_member(email, first_name, last_name, oauth_provider_num):
     return user, member
 
 
-def save_google_member(google_access_token):
-    google_api_response = requests.get(
-        "https://www.googleapis.com/userinfo/v2/me",
-        headers={
-            "Authorization": f"Bearer {google_access_token}",
-            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
-        },
-    )
-
-    google_api_response = google_api_response.json()
-
-    email = google_api_response["email"]
-    name = google_api_response["name"]
-    given_name = google_api_response["given_name"]
-
+def save_google_member(email, given_name, family_name):
     member = Member.objects.filter(email=str(email))
     if member.exists():
         member = member.get()
@@ -347,7 +349,7 @@ def save_google_member(google_access_token):
         member = Member.objects.create(
             user=user,
             email=email,
-            first_name=name,
+            first_name=family_name,
             last_name=given_name,
             oauth_provider=3,
             is_authorized=True,
