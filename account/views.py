@@ -74,7 +74,7 @@ class KakaoLogin(APIView):
             status=status.HTTP_200_OK,
         )
 
-    @api_view(["GET"])
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def kakao_login(request):
         try:
