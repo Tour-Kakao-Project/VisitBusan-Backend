@@ -17,7 +17,10 @@ from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom400Exception import *
 from visit_busan.utils.email_util import send_sign_up_email
 from account.cache.authorized_code import *
-from account.service.google_api.google_oauth_api import *
+from account.service.google_api.google_oauth_api import (
+    get_google_user_info_from_access_token,
+    get_google_user_info_from_id_token,
+)
 
 
 class KakaoLogin(APIView):
