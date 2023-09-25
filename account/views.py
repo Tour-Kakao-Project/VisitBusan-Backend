@@ -80,6 +80,8 @@ class KakaoLogin(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def kakao_login(request):
+        print("kakao login")
+        print(requests.data)
         try:
             kakao_access_token = request.data["kakao_access_token"]
 
