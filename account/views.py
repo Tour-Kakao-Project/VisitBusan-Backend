@@ -153,11 +153,11 @@ class Visit_Busan_Login(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_sign_up(request):
+        print(request.data)
         email = request.data["email"]
         passwd = request.data["password"]
         first_name = request.data["first_name"]
         last_name = request.data["last_name"]
-        phone_number = request.data["phone_number"]
 
         # 1. Check the email
         member = Member.objects.filter(email=str(email))
@@ -173,7 +173,7 @@ class Visit_Busan_Login(APIView):
             raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
         # 3. Save
-        user, member = save_member(email, first_name, last_name, 1, phone_number)
+        user, member = save_member(email, first_name, last_name, 1)
 
         # 4. Send email
         send_sign_up_email(member.email)
@@ -197,12 +197,19 @@ class Visit_Busan_Login(APIView):
         if not check_passwd_rule(passwd):
             raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
-        # 2. Get backend token
+        # + Check is_authoirzed
+        member = member.get()
+        # if not member.is_authorized:
+        #     return Response(
+        #         {"email": member.email, "is_authorized": False},
+        #         status=status.HTTP_401_UNAUTHORIZED,
+        #     )
+
+        # 3. Get backend token
         user = User.objects.get(username=str(email))
         jwt_token = get_tokens_for_user(user)
 
-        # 3. Save refresh token
-        member = member.get()
+        # 4. Save refresh token
         member.refresh_token = jwt_token["refresh_token"]
         member.save()
 
@@ -295,7 +302,7 @@ class GoogleLogin:
             print(e)
 
 
-def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
+def save_member(email, first_name, last_name, oauth_provider_num):
     user = User.objects.create(username=str(email))
     user.save()
 
@@ -305,7 +312,6 @@ def save_member(email, first_name, last_name, oauth_provider_num, phone_number):
         first_name=first_name,
         last_name=last_name,
         oauth_provider=oauth_provider_num,
-        phone_number=phone_number,
         is_authorized=False,
     )
     member.save()
