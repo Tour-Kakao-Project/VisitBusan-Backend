@@ -272,7 +272,7 @@ class GoogleLogin:
             status=status.HTTP_200_OK,
         )
 
-    @api_view(["GET"])
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def google_login(request):
         try:
