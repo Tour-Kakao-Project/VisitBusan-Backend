@@ -11,6 +11,9 @@ services:
       - .:/app
     environment:
       TZ: "Asia/Seoul"
+    depends_on:
+      - redis
+      
   redis: 
     container_name: redis
     image: redis:6.2.6-alpine
