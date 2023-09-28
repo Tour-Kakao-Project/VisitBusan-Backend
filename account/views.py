@@ -416,3 +416,13 @@ def find_member_by_email(email):
         return member.get()
     else:
         raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_email(requests):
+    try:
+        context = {"email": "lchy0413@gmail.com", "authorized_code": 1234}
+        return render(requests, "account/mail_template_b.html", context=context)
+    except Exception as e:
+        e
