@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{% static 'css/mail_a.css' %}">
+    <title>Html Generated</title>
+    <meta name="description" content="Figma htmlGenerator">
+    <meta name="author" content="htmlGenerator">
+    
+    <style>
+
+      body {background: #E5E5E5; }
+    </style>
+  
+  </head>
+  
+  <body>
+    <div class="e1125_5591">
+      <div  class="e1125_5605"></div>
+      <div  class="e1125_5627"></div>
+      <span  class="e1125_5628">Your verification code is:</span>
+      <span  class="e1125_5629">This e-mail({{ email }}) is an e-mail authentication for registration of application ‘Visit-Busan-Tour’. <br>
+Please enter the code to verify your identity.</span><span  class="e1125_5630">{{ authorized_code }}</span></div>
+  </body>
+</html>
