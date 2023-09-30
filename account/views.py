@@ -185,7 +185,7 @@ class Visit_Busan_Login(APIView):
         user, member = save_member(email, first_name, last_name, 1)
 
         # 4. Send email
-        send_sign_up_email(member.email)
+        send_sign_up_email_with_templete(member.email)
 
         return Response({"email": member.email}, status=status.HTTP_200_OK)
 
@@ -429,10 +429,3 @@ def show_mail_templates(requests):
         return render(requests, "account/mail_template_b.html", context=context)
     except Exception as e:
         e
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def test_email(requests):
-    send_sign_up_email_with_templete("lchy0413@gmail.com")
-    return Response({"result": "Success"}, status=status.HTTP_200_OK)
