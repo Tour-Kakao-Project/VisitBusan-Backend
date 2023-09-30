@@ -39,6 +39,6 @@ def send_sign_up_email_with_templete(email):
     }
 
     # 2. 이메일 전송
-    html_mail = render_to_string("account/mail_template_a.html", context)
+    html_mail = render_to_string("account/mail_template_b.html", context)
     content = f"인증코드: {authorized_code}"
     send_mail(subject, content, sender_email, [email], html_message=html_mail)

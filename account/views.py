@@ -15,7 +15,10 @@ from visit_busan.settings import env
 from visit_busan.enum.index import *
 from visit_busan.utils.string_utils import *
 from visit_busan.exception.Custom400Exception import *
-from visit_busan.utils.email_util import send_sign_up_email
+from visit_busan.utils.email_util import (
+    send_sign_up_email,
+    send_sign_up_email_with_templete,
+)
 from account.cache.authorized_code import *
 from account.service.google_api.google_oauth_api import (
     get_google_user_info_from_access_token,
@@ -420,9 +423,16 @@ def find_member_by_email(email):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def test_email(requests):
+def show_mail_templates(requests):
     try:
         context = {"email": "lchy0413@gmail.com", "authorized_code": 1234}
         return render(requests, "account/mail_template_b.html", context=context)
     except Exception as e:
         e
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_email(requests):
+    send_sign_up_email_with_templete("lchy0413@gmail.com")
+    return Response({"result": "Success"}, status=status.HTTP_200_OK)

@@ -8,7 +8,7 @@
     <meta name="author" content="htmlGenerator" />
   </head>
 
-  <body style="background: #e5e5e5">
+  <body>
     <div
       style="
         background-image: linear-gradient(
@@ -19,78 +19,62 @@
         );
         width: 800px;
         height: 600px;
-        position: absolute;
+        padding: 42px 0 0 61px;
       ">
       <div
         style="
           background-color: rgba(255, 255, 255, 1);
           width: 716px;
           height: 478px;
-          position: absolute;
-          left: 42px;
-          top: 61px;
           border-top-left-radius: 30px;
           border-top-right-radius: 30px;
           border-bottom-left-radius: 30px;
           border-bottom-right-radius: 30px;
+          padding: 60px 0 0 31px;
         ">
         <div
           style="
             width: 102px;
             height: 85px;
-            position: absolute;
-            left: 91px;
-            top: 104px;
             background-image: url(https://visit-busan-s3.s3.ap-northeast-2.amazonaws.com/mail/visit_busan_tour_email.png);
             background-repeat: no-repeat;
             background-size: cover;
           "></div>
-        <span
+        <p
           style="
             color: rgba(0, 0, 0, 1);
             width: 219px;
             height: 20px;
-            position: absolute;
-            left: 91px;
-            top: 238px;
             font-family: Pretendard;
             text-align: left;
             font-size: 20px;
             letter-spacing: 0;
             line-height: px;
           "
-          >Your verification code is:<span
+          >Your verification code is:
+          <p
+            style="
+              color: rgba(0, 0, 0, 1);
+              width: 60px;
+              height: 20px;
+              font-family: Pretendard;
+              text-align: left;
+              font-size: 24px;
+              letter-spacing: 0;
+              line-height: px;
+            "
+            >{{ authorized_code }} </p
+          ><p
             style="
               color: rgba(0, 0, 0, 1);
               width: 607px;
-              height: 95px;
-              position: absolute;
-              left: 91px;
-              top: 397px;
               font-family: Pretendard;
               text-align: left;
               font-size: 20px;
               letter-spacing: 0;
             "
-            >This e-mail({{ email }}) is an e-mail authentication for
-            registration of application ‘Visit-Busan-Tour’. Please enter the
-            code to verify your identity.<span
-              style="
-                color: rgba(0, 0, 0, 1);
-                width: 60px;
-                height: 20px;
-                position: absolute;
-                left: 91px;
-                top: 314px;
-                font-family: Pretendard;
-                text-align: left;
-                font-size: 24px;
-                letter-spacing: 0;
-                line-height: px;
-              "
-              >{{ authorized_code }}
-            </span></span
-          ></span
+            >This e-mail({{ email }}) is an e-mail authentication for registration of application ‘Visit-Busan-Tour’. Please enter the code to verify your identity.</p
+          ></p
         >
       </div>
     </div>
