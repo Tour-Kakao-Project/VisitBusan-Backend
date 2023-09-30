@@ -1,27 +1,98 @@
-
 <!DOCTYPE html>
 <html lang="en">
-{% load static %}
   <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="{% static 'css/mail_a.css' %}">
-    <title>Html Generated</title>
-    <meta name="description" content="Figma htmlGenerator">
-    <meta name="author" content="htmlGenerator">
-    
-    <style>
+    <meta charset="utf-8" />
 
-      body {background: #E5E5E5; }
-    </style>
-  
+    <title>Html Generated</title>
+    <meta name="description" content="Figma htmlGenerator" />
+    <meta name="author" content="htmlGenerator" />
   </head>
-  
-  <body>
-    <div class="e1125_5591">
-      <div  class="e1125_5605"></div>
-      <div  class="e1125_5627"></div>
-      <span  class="e1125_5628">Your verification code is:</span>
-      <span  class="e1125_5629">This e-mail({{ email }}) is an e-mail authentication for registration of application ‘Visit-Busan-Tour’. <br>
-Please enter the code to verify your identity.</span><span  class="e1125_5630">{{ authorized_code }}</span></div>
+
+  <body style="background: #e5e5e5">
+    <div
+      style="
+        background-image: linear-gradient(
+          0deg,
+          rgba(95.00000193715096, 187.00000405311584, 236.00000113248825, 1) 0%,
+          rgba(206.0000029206276, 185.00000417232513, 227.00000166893005, 1)
+            100%
+        );
+        width: 800px;
+        height: 600px;
+        position: absolute;
+      ">
+      <div
+        style="
+          background-color: rgba(255, 255, 255, 1);
+          width: 716px;
+          height: 478px;
+          position: absolute;
+          left: 42px;
+          top: 61px;
+          border-top-left-radius: 30px;
+          border-top-right-radius: 30px;
+          border-bottom-left-radius: 30px;
+          border-bottom-right-radius: 30px;
+        ">
+        <div
+          style="
+            width: 102px;
+            height: 85px;
+            position: absolute;
+            left: 91px;
+            top: 104px;
+            background-image: url(https://visit-busan-s3.s3.ap-northeast-2.amazonaws.com/mail/visit_busan_tour_email.png);
+            background-repeat: no-repeat;
+            background-size: cover;
+          "></div>
+        <span
+          style="
+            color: rgba(0, 0, 0, 1);
+            width: 219px;
+            height: 20px;
+            position: absolute;
+            left: 91px;
+            top: 238px;
+            font-family: Pretendard;
+            text-align: left;
+            font-size: 20px;
+            letter-spacing: 0;
+            line-height: px;
+          "
+          >Your verification code is:<span
+            style="
+              color: rgba(0, 0, 0, 1);
+              width: 607px;
+              height: 95px;
+              position: absolute;
+              left: 91px;
+              top: 397px;
+              font-family: Pretendard;
+              text-align: left;
+              font-size: 20px;
+              letter-spacing: 0;
+            "
+            >This e-mail({{ email }}) is an e-mail authentication for
+            registration of application ‘Visit-Busan-Tour’. Please enter the
+            code to verify your identity.<span
+              style="
+                color: rgba(0, 0, 0, 1);
+                width: 60px;
+                height: 20px;
+                position: absolute;
+                left: 91px;
+                top: 314px;
+                font-family: Pretendard;
+                text-align: left;
+                font-size: 24px;
+                letter-spacing: 0;
+                line-height: px;
+              "
+              >{{ authorized_code }}
+            </span></span
+          ></span
+        >
+      </div>
+    </div>
   </body>
 </html>

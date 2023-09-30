@@ -30,9 +30,15 @@ def send_sign_up_email_with_templete(email):
     subject = "[Visit Busan Tour] Membership e-mail authentication"
     content = authorized_code
     sender_email = EMAIL_HOST_USER
-    context = {"email": email, "authorized_code": authorized_code}
+    context = {
+        "domain": "localhost",
+        # "domain": env("EC2_IP")
+        "url": "/account/sign-up/email",
+        "email": email,
+        "authorized_code": authorized_code,
+    }
 
     # 2. 이메일 전송
-    html_mail = render_to_string("account/mail_templateA.html", context)
+    html_mail = render_to_string("account/mail_template_a.html", context)
     content = f"인증코드: {authorized_code}"
     send_mail(subject, content, sender_email, [email], html_message=html_mail)
