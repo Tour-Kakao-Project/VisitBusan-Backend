@@ -20,4 +20,6 @@ urlpatterns = [
     path("sign-up/duplicated-email", views.check_duplicated_email),
     path("authorize", views.check_authentication_code),
     path("authorize/reissue", views.reissue_authentication_code),
+    # test
+    path("sign-up/email", views.show_mail_templates),
 ]
