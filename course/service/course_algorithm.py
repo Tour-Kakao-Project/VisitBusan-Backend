@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 from visit_busan.enum.index import *
+from course.model.vo.CoureseLocationVo import CourseLocationVo
+from course.service.kakao_api.kakao_location_api import *
 
 
 def create_course_result(course_style):
@@ -19,39 +21,38 @@ def create_course_result(course_style):
 
     # TBD algorithm
     ## Test 데이터
-    location = [
-        {
-            "location_name": "뮤지임원",
-            "location_url": "https://kunst1.co.kr/museumone",
-            "location_type": Location_Type.MUSEUM.key,
-            "location_score": 4.2,
-            "next_location_transportation_time": 6,
-            "next_location_transportation": Transportation.WALK.key,
-        },
-        {
-            "location_name": "엘룬",
-            "location_url": "http://localmap.co.kr/web/splus/kmap/view.php?sigun=6260000&gugun=3360000&keyno=126&keyname=%EC%97%98%EB%A3%AC%28elune%29&keylink=3360000-101-2017-00187",
-            "location_type": Location_Type.RESTARTANT.key,
-            "location_score": 4.2,
-            "next_location_transportation_time": 7,
-            "next_location_transportation": Transportation.CAR.key,
-        },
-        {
-            "location_name": "요트홀릭 렉셔리 요트 투어",
-            "location_url": "https://www.myrealtrip.com/offers/103284",
-            "location_type": Location_Type.YACHT.key,
-            "location_score": 4.7,
-            "next_location_transportation_time": 3,
-            "next_location_transportation": Transportation.WALK.key,
-        },
-        {
-            "location_name": "우미",
-            "location_url": "https://app.catchtable.co.kr/ct/shop/umi",
-            "location_score": 4.3,
-            "next_location_transportation_time": 0,
-            "next_location_transportation": None,
-        },
+    locations = [
+        CourseLocationVo(
+            "청사포다릿돌전망대",
+            "https://maps.app.goo.gl/rSELDxwxMyysZ8cL7",
+            "부산광역시 해운대구 중동 산 3-9",
+            4.3,
+            Location_Type.OBSERVATORY.key,
+        ),
+        CourseLocationVo(
+            "해운대해변열차",
+            "https://maps.app.goo.gl/BkZSVmETzetnR4ck9",
+            "부산광역시 해운대구 달맞이길 62번길 13",
+            4.3,
+            Location_Type.ACTIVITY.key,
+        ),
+        CourseLocationVo(
+            "해운대해수욕장‧송림공원",
+            "https://maps.app.goo.gl/pEf5ZEkHaMk5Rrw17",
+            "부산광역시 해운대구 해운대해변로 266",
+            4.5,
+            Location_Type.BEACH.key,
+        ),
+        CourseLocationVo(
+            "부산아쿠아리움",
+            "https://maps.app.goo.gl/hZW5G9cUzoTmysTR6",
+            "부산광역시 영도구 전망로 24",
+            4.2,
+            Location_Type.AQUARIUM.key,
+        ),
     ]
+
+    get_longitude_and_latitude(locations)
 
     check_date = start_date
     course_detail = []
@@ -59,7 +60,7 @@ def create_course_result(course_style):
         course_detail.append(
             {
                 "date": check_date.strftime("%Y-%m-%d"),
-                "location": location,
+                "location": [location.json for location in locations],
             }
         )
 
@@ -73,3 +74,11 @@ def create_course_result(course_style):
     }
 
     return course_result
+
+
+def get_longitude_and_latitude(locations):
+    for courseVO in locations:
+        address = courseVO.location_address
+        longitude, latitude = request_longitude_and_latitude(address)
+
+        courseVO.setLongitude_setLatitude(longitude, latitude)

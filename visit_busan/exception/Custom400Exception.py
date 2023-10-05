@@ -4,9 +4,9 @@ from rest_framework.views import exception_handler
 from visit_busan.enum.errors import *
 
 
-class Custom404Exception(APIException):
-    status_code = 404
-    default_code = "NotFound"
+class Custom400Exception(APIException):
+    status_code = 400
+    default_code = "BadRequest"
     default_detail = "다시 확인해주세요"
 
     def __init__(self, error_code, error_detail=""):

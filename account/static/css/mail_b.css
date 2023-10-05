@@ -1,0 +1,63 @@
+
+.e1125_5614 { 
+	background-color:rgba(255, 255, 255, 1);
+	width:1024px;
+	height:708px;
+	position:absolute;
+}
+.e1125_5616 { 
+	width:102px;
+	height:85px;
+	position:absolute;
+	left:91px;
+	top:99px;
+	background-image:url(/static/images/visit_busan_tour_email.png);
+	background-repeat:no-repeat;
+	background-size:cover;
+}
+.e1125_5617 { 
+	background-image:linear-gradient(0deg, rgba(95.00000193715096, 187.00000405311584, 236.00000113248825, 1) 0%,rgba(206.0000029206276, 185.00000417232513, 227.00000166893005, 1) 100%) ;
+	width:890px;
+	height:11px;
+	position:absolute;
+	left:67px;
+	top:41px;
+}
+.e1125_5618 { 
+	color:rgba(0, 0, 0, 1);
+	width:263px;
+	height:20px;
+	position:absolute;
+	left:91px;
+	top:269px;
+	font-family:Pretendard;
+	text-align:left;
+	font-size:24px;
+	letter-spacing:0;
+	line-height:px;
+}
+.e1125_5620 { 
+	color:rgba(0, 0, 0, 1);
+	width:607px;
+	height:110px;
+	position:absolute;
+	left:91px;
+	top:444px;
+	font-family:Pretendard;
+	text-align:left;
+	font-size:24px;
+	letter-spacing:0;
+}
+.e1125_5619 { 
+	color:rgba(0, 0, 0, 1);
+	width:89px;
+	height:20px;
+	position:absolute;
+	left:91px;
+	top:353px;
+	font-family:Pretendard;
+	text-align:left;
+	font-size:36px;
+	letter-spacing:0;
+	line-height:px;
+}

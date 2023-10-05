@@ -19,15 +19,17 @@ class Course(models.Model):
 
     """
     [
-        {
+       {
           "date": XXXX-XX-XX,
-          "location": [
+          "location": [ {
               "location_name": "",
               "location_url": "",
+              "location_address"; "",
+              "location_longitude": 0,
+              "location_latitude": 0,
               "location_score": 0.00,
               "location_type": "MUSEUM/RESTARTANT/YACHT/",
-              "next_location_transportation_time": 00,
-              "next_location_transportation": "CAR/BUS/SUBWAY/WALK",
+            }       
           ]
         },
     ]
