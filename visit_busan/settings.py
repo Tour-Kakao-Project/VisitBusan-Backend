@@ -16,9 +16,9 @@ environ.Env.read_env(env_file=os.path.join(BASE_DIR, ".env"))
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = [env("EC2_IP"), "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [env("EC2_IP"), "localhost", "127.0.0.1", "api.ipify.org"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -67,7 +67,6 @@ WSGI_APPLICATION = "visit_busan.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     "default": {
@@ -78,12 +77,21 @@ DATABASES = {
         "HOST": env("LOCAL_DB_HOST"),
         "PORT": "3306",
         "OPTIONS": {"init_command": 'SET sql_mode="STRICT_TRANS_TABLES"'},
+    },
+}
+
+CACHE = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f'redis://{env("LOCAL_REDIS_HOST")}:{env("LOCAL_REDIS_PORT")}',
+        "OPTION": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
     }
 }
 
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -114,9 +122,9 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "account", "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -138,3 +146,11 @@ SIMPLE_JWT = {
     "SIGNING_KEY": env("DJANGO_SECRET_KEY"),
     "ALGORITHM": "HS256",
 }
+
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.googlemail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = env("VISITBUSAN_EMAIL")
+EMAIL_HOST_PASSWORD = env("VISITBUSAN_EMAIL_PASSWD")
