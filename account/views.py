@@ -455,3 +455,16 @@ class Visit_Busan_Member(APIView):
                 )
         else:
             raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
+
+    @api_view(["DELETE"])
+    @permission_classes([AllowAny])
+    def delete_member(request):
+        member = request.user.member
+        email = member.email
+        user = member.user
+
+        user.delete()
+        return Response(
+            {"email": email, "result": "Success"},
+            status=status.HTTP_200_OK,
+        )

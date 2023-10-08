@@ -24,4 +24,5 @@ urlpatterns = [
     path("sign-up/email", views.show_mail_templates),
     # account
     path("member/find-passwd", views.Visit_Busan_Member.find_passwd),
+    path("member", views.Visit_Busan_Member.delete_member),
 ]
