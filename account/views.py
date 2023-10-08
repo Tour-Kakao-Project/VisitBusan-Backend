@@ -18,6 +18,7 @@ from visit_busan.exception.Custom400Exception import *
 from visit_busan.utils.email_util import (
     send_sign_up_email,
     send_sign_up_email_with_templete,
+    send_passwd,
 )
 from account.cache.authorized_code import *
 from account.service.google_api.google_oauth_api import (
@@ -182,7 +183,7 @@ class Visit_Busan_Login(APIView):
             raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
         # 3. Save
-        user, member = save_member(email, first_name, last_name, 1)
+        user, member = save_member(email, first_name, last_name, 1, passwd)
 
         # 4. Send email
         send_sign_up_email_with_templete(member.email)
@@ -205,6 +206,9 @@ class Visit_Busan_Login(APIView):
         # 2. Check the password
         if not check_passwd_rule(passwd):
             raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
+
+        if passwd != member.get().passwd:
+            raise Custom400Exception(ErrorCode_400.WRONG_PASSWD)
 
         # + Check is_authoirzed
         member = member.get()
@@ -323,7 +327,7 @@ class GoogleLogin:
             )
 
 
-def save_member(email, first_name, last_name, oauth_provider_num):
+def save_member(email, first_name, last_name, oauth_provider_num, passwd):
     user = User.objects.create(username=str(email))
     user.save()
 
@@ -334,6 +338,7 @@ def save_member(email, first_name, last_name, oauth_provider_num):
         last_name=last_name,
         oauth_provider=oauth_provider_num,
         is_authorized=False,
+        passwd=passwd,
     )
     member.save()
     return user, member
@@ -429,3 +434,24 @@ def show_mail_templates(requests):
         return render(requests, "account/mail_template_b.html", context=context)
     except Exception as e:
         e
+
+
+class Visit_Busan_Member(APIView):
+    @api_view(["GET"])
+    @permission_classes([AllowAny])
+    def find_passwd(request):
+        email = request.data["email"]
+
+        member = Member.objects.filter(email=str(email))
+        if member.exists():
+            member = member.get()
+            if member.oauth_provider != "1":
+                Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+            else:
+                send_passwd(email, member.passwd)
+                return Response(
+                    {"email": email, "result": "Success"},
+                    status=status.HTTP_200_OK,
+                )
+        else:
+            raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
