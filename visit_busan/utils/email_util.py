@@ -42,3 +42,11 @@ def send_sign_up_email_with_templete(email):
     html_mail = render_to_string("account/mail_template_b.html", context)
     content = f"인증코드: {authorized_code}"
     send_mail(subject, content, sender_email, [email], html_message=html_mail)
+
+
+def send_passwd(email, passwd):
+    # 2. 이메일 전송
+    title = "Visit Busan Tour 비밀번호 찾기"
+    content = f"이메일: {email} \n 비밀번호: {passwd}"
+    email = EmailMessage(title, content, to=[email])
+    email.send()
