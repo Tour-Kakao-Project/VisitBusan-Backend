@@ -191,7 +191,7 @@ class Visit_Busan_Login(APIView):
 
         return Response({"email": member.email}, status=status.HTTP_200_OK)
 
-    @api_view(["GET"])
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_login(request):
         email = request.data["email"]
