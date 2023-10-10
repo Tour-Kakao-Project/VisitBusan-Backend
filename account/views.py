@@ -25,6 +25,7 @@ from account.service.google_api.google_oauth_api import (
     get_google_user_info_from_access_token,
     get_google_user_info_from_id_token,
 )
+from account.serializers import *
 
 
 class KakaoLogin(APIView):
@@ -456,9 +457,19 @@ class Visit_Busan_Member(APIView):
         else:
             raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
 
-    @api_view(["DELETE"])
-    @permission_classes([AllowAny])
-    def delete_member(request):
+
+class MemberView(APIView):
+    # Send member info
+    def get(self, request):
+        member = request.user.member
+
+        return Response(
+            MemberSerializers(member).data,
+            status=status.HTTP_200_OK,
+        )
+
+    # Remove member data(user, member, course)
+    def delete(self, request):
         member = request.user.member
         email = member.email
         user = member.user
