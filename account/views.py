@@ -194,42 +194,48 @@ class Visit_Busan_Login(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_login(request):
-        email = request.data["email"]
-        passwd = request.data["password"]
+        try:
+            email = request.data["email"]
+            passwd = request.data["password"]
 
-        # 1. Check the email
-        member = Member.objects.filter(email=str(email))
-        if member.exists():
-            login_service = member.get().oauth_provider
-            if login_service != "1":
-                raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
+            print(f"email: {email}, passwd: {passwd}")
 
-        # 2. Check the password
-        if not check_passwd_rule(passwd):
-            raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
+            # 1. Check the email
+            member = Member.objects.filter(email=str(email))
+            if member.exists():
+                login_service = member.get().oauth_provider
+                if login_service != "1":
+                    raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
+            print(2)
+            # 2. Check the password
+            if not check_passwd_rule(passwd):
+                raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
-        if passwd != member.get().passwd:
-            raise Custom400Exception(ErrorCode_400.WRONG_PASSWD)
+            if passwd != member.get().passwd:
+                raise Custom400Exception(ErrorCode_400.WRONG_PASSWD)
+            print(3)
+            # + Check is_authoirzed
+            member = member.get()
+            # if not member.is_authorized:
+            #     return Response(
+            #         {"email": member.email, "is_authorized": False},
+            #         status=status.HTTP_401_UNAUTHORIZED,
+            #     )
+            print(4)
+            # 3. Get backend token
+            user = User.objects.get(username=str(email))
+            jwt_token = get_tokens_for_user(user)
+            print(5)
+            # 4. Save refresh token
+            member.refresh_token = jwt_token["refresh_token"]
+            member.save()
 
-        # + Check is_authoirzed
-        member = member.get()
-        # if not member.is_authorized:
-        #     return Response(
-        #         {"email": member.email, "is_authorized": False},
-        #         status=status.HTTP_401_UNAUTHORIZED,
-        #     )
-
-        # 3. Get backend token
-        user = User.objects.get(username=str(email))
-        jwt_token = get_tokens_for_user(user)
-
-        # 4. Save refresh token
-        member.refresh_token = jwt_token["refresh_token"]
-        member.save()
-
-        return Response(
-            {"email": member.email, "jwt_token": jwt_token}, status=status.HTTP_200_OK
-        )
+            return Response(
+                {"email": member.email, "jwt_token": jwt_token},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            print(e)
 
 
 class GoogleLogin:
