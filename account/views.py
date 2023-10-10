@@ -198,7 +198,7 @@ class Visit_Busan_Login(APIView):
             email = request.data["email"]
             passwd = request.data["password"]
 
-            print(f"email: {email}, passwd: {passwd}")
+            print(request.data)
 
             # 1. Check the email
             member = Member.objects.filter(email=str(email))
