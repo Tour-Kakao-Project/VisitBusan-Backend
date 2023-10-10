@@ -206,14 +206,13 @@ class Visit_Busan_Login(APIView):
                 login_service = member.get().oauth_provider
                 if login_service != "1":
                     raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
-            print(2)
+
             # 2. Check the password
             if not check_passwd_rule(passwd):
                 raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
             if passwd != member.get().passwd:
                 raise Custom400Exception(ErrorCode_400.WRONG_PASSWD)
-            print(3)
             # + Check is_authoirzed
             member = member.get()
             # if not member.is_authorized:
@@ -221,11 +220,10 @@ class Visit_Busan_Login(APIView):
             #         {"email": member.email, "is_authorized": False},
             #         status=status.HTTP_401_UNAUTHORIZED,
             #     )
-            print(4)
+
             # 3. Get backend token
             user = User.objects.get(username=str(email))
             jwt_token = get_tokens_for_user(user)
-            print(5)
             # 4. Save refresh token
             member.refresh_token = jwt_token["refresh_token"]
             member.save()
@@ -234,6 +232,8 @@ class Visit_Busan_Login(APIView):
                 {"email": member.email, "jwt_token": jwt_token},
                 status=status.HTTP_200_OK,
             )
+        except Custom400Exception as e:
+            raise e
         except Exception as e:
             print(e)
 
