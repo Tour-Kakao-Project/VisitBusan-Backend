@@ -401,8 +401,8 @@ def check_duplicated_email(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def check_authentication_code(request):
-    print(requests.data)
     try:
+        print(requests.data)
         email = request.data["email"]
         code = request.data["authentication_code"]
 
@@ -446,29 +446,36 @@ def show_mail_templates(requests):
     try:
         context = {"email": "lchy0413@gmail.com", "authorized_code": 1234}
         return render(requests, "account/email_authentication_b.html", context=context)
+    except Custom400Exception as e:
+        raise e
     except Exception as e:
-        e
+        print(e)
 
 
 class Visit_Busan_Member(APIView):
     @api_view(["GET"])
     @permission_classes([AllowAny])
     def find_passwd(request):
-        email = request.data["email"]
-
-        member = Member.objects.filter(email=str(email))
-        if member.exists():
-            member = member.get()
-            if member.oauth_provider != "1":
-                Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+        try:
+            print(requests.data)
+            email = request.data["email"]
+            member = Member.objects.filter(email=str(email))
+            if member.exists():
+                member = member.get()
+                if member.oauth_provider != "1":
+                    Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+                else:
+                    send_passwd_with_templete(email, member.passwd)
+                    return Response(
+                        {"email": email, "result": "Success"},
+                        status=status.HTTP_200_OK,
+                    )
             else:
-                send_passwd_with_templete(email, member.passwd)
-                return Response(
-                    {"email": email, "result": "Success"},
-                    status=status.HTTP_200_OK,
-                )
-        else:
-            raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
+                raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
+        except Custom400Exception as e:
+            raise e
+        except Exception as e:
+            print(e)
 
 
 class MemberView(APIView):
