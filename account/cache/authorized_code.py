@@ -11,7 +11,7 @@ def save_authorized_code(code, email):
     data = AuthroizedCodeVO(code, email).json
     is_existed = cache.get(email)
     if not is_existed:
-        cache.set(email, data, 1 * 60 * 60)
+        cache.set(email, data, 1 * 600 * 600)
         return data
     else:
         print("이미 존재합니다.")
