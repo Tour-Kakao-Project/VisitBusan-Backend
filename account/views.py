@@ -396,6 +396,7 @@ def check_duplicated_email(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def check_authentication_code(request):
+    print(requests.data)
     email = request.data["email"]
     code = request.data["authentication_code"]
 
