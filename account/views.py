@@ -205,11 +205,11 @@ class Visit_Busan_Login(APIView):
             if member.exists():
                 login_service = member.get().oauth_provider
                 if login_service != "1":
-                    raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
+                    raise Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
 
             # 2. Check the password
             if not check_passwd_rule(passwd):
-                raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
+                raise Custom400Exception(ErrorCode_400.INVAILD_PASSWD)
 
             if passwd != member.get().passwd:
                 raise Custom400Exception(ErrorCode_400.WRONG_PASSWD)
