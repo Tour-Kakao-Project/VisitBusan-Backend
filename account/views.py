@@ -402,7 +402,7 @@ def check_duplicated_email(request):
 @permission_classes([AllowAny])
 def check_authentication_code(request):
     try:
-        print(requests.data)
+        print(request.data)
         email = request.data["email"]
         code = request.data["authentication_code"]
 
@@ -457,7 +457,7 @@ class Visit_Busan_Member(APIView):
     @permission_classes([AllowAny])
     def find_passwd(request):
         try:
-            print(requests.data)
+            print(request.data)
             email = request.data["email"]
             member = Member.objects.filter(email=str(email))
             if member.exists():
