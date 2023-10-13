@@ -85,7 +85,6 @@ class KakaoLogin(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def kakao_login(request):
-        print("kakao login")
         print(requests.data)
         try:
             kakao_access_token = request.data["kakao_access_token"]
@@ -416,13 +415,10 @@ def check_authentication_code(request):
 @permission_classes([AllowAny])
 def reissue_authentication_code(request):
     email = request.data["email"]
-    authorized_code = random.randrange(1000, 10000)
 
-    save_authorized_code(authorized_code, email)
+    send_sign_up_email_with_templete(email)
 
-    return Response(
-        {"email": authorized_code, "result": "Success"}, status=status.HTTP_200_OK
-    )
+    return Response({"email": email, "result": "Success"}, status=status.HTTP_200_OK)
 
 
 def find_member_by_email(email):
@@ -438,7 +434,7 @@ def find_member_by_email(email):
 def show_mail_templates(requests):
     try:
         context = {"email": "lchy0413@gmail.com", "authorized_code": 1234}
-        return render(requests, "account/mail_template_b.html", context=context)
+        return render(requests, "account/email_authentication_b.html", context=context)
     except Exception as e:
         e
 
