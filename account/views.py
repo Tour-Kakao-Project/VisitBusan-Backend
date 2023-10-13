@@ -206,6 +206,8 @@ class Visit_Busan_Login(APIView):
                 login_service = member.get().oauth_provider
                 if login_service != "1":
                     raise Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+            else:
+                raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
 
             # 2. Check the password
             if not check_passwd_rule(passwd):
