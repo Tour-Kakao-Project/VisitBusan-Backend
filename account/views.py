@@ -108,8 +108,10 @@ class KakaoLogin(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-        except:
-            pass
+        except Custom400Exception as e:
+            raise e
+        except Exception as e:
+            print(e)
 
 
 def get_tokens_for_user(user):
