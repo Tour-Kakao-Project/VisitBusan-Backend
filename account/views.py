@@ -19,6 +19,7 @@ from visit_busan.utils.email_util import (
     send_sign_up_email,
     send_sign_up_email_with_templete,
     send_passwd,
+    send_passwd_with_templete,
 )
 from account.cache.authorized_code import *
 from account.service.google_api.google_oauth_api import (
@@ -452,7 +453,7 @@ class Visit_Busan_Member(APIView):
             if member.oauth_provider != "1":
                 Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
             else:
-                send_passwd(email, member.passwd)
+                send_passwd_with_templete(email, member.passwd)
                 return Response(
                     {"email": email, "result": "Success"},
                     status=status.HTTP_200_OK,
