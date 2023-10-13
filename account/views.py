@@ -19,6 +19,7 @@ from visit_busan.utils.email_util import (
     send_sign_up_email,
     send_sign_up_email_with_templete,
     send_passwd,
+    send_passwd_with_templete,
 )
 from account.cache.authorized_code import *
 from account.service.google_api.google_oauth_api import (
@@ -107,8 +108,10 @@ class KakaoLogin(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-        except:
-            pass
+        except Custom400Exception as e:
+            raise e
+        except Exception as e:
+            print(e)
 
 
 def get_tokens_for_user(user):
@@ -205,6 +208,8 @@ class Visit_Busan_Login(APIView):
                 login_service = member.get().oauth_provider
                 if login_service != "1":
                     raise Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+            else:
+                raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
 
             # 2. Check the password
             if not check_passwd_rule(passwd):
@@ -397,19 +402,24 @@ def check_duplicated_email(request):
 @permission_classes([AllowAny])
 def check_authentication_code(request):
     print(requests.data)
-    email = request.data["email"]
-    code = request.data["authentication_code"]
+    try:
+        email = request.data["email"]
+        code = request.data["authentication_code"]
 
-    member = find_member_by_email(email)
+        member = find_member_by_email(email)
 
-    result = authorize_code(code, email)
-    if result == True:
-        member.is_authorized = 1
-        member.save()
+        result = authorize_code(code, email)
+        if result == True:
+            member.is_authorized = 1
+            member.save()
 
-        return Response(
-            {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
-        )
+            return Response(
+                {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
+            )
+    except Custom400Exception as e:
+        raise e
+    except Exception as e:
+        print(e)
 
 
 @api_view(["POST"])
@@ -452,7 +462,7 @@ class Visit_Busan_Member(APIView):
             if member.oauth_provider != "1":
                 Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
             else:
-                send_passwd(email, member.passwd)
+                send_passwd_with_templete(email, member.passwd)
                 return Response(
                     {"email": email, "result": "Success"},
                     status=status.HTTP_200_OK,
