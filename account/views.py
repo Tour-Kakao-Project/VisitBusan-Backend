@@ -453,7 +453,7 @@ def show_mail_templates(requests):
 
 
 class Visit_Busan_Member(APIView):
-    @api_view(["GET"])
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def find_passwd(request):
         try:
