@@ -402,19 +402,24 @@ def check_duplicated_email(request):
 @permission_classes([AllowAny])
 def check_authentication_code(request):
     print(requests.data)
-    email = request.data["email"]
-    code = request.data["authentication_code"]
+    try:
+        email = request.data["email"]
+        code = request.data["authentication_code"]
 
-    member = find_member_by_email(email)
+        member = find_member_by_email(email)
 
-    result = authorize_code(code, email)
-    if result == True:
-        member.is_authorized = 1
-        member.save()
+        result = authorize_code(code, email)
+        if result == True:
+            member.is_authorized = 1
+            member.save()
 
-        return Response(
-            {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
-        )
+            return Response(
+                {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
+            )
+    except Custom400Exception as e:
+        raise e
+    except Exception as e:
+        print(e)
 
 
 @api_view(["POST"])
