@@ -9,6 +9,11 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    logging:
+      driver: 'json-file'
+      option:
+        max-size: '100k'
+        max-file: '10'
 volumes:
   app:
   dbdata:
