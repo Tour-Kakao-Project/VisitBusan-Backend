@@ -17,3 +17,8 @@ class CourseStyleAdmin(admin.ModelAdmin):
         "place",
         "updated_at",
     ]
+
+
+@admin.register(CourseData)
+class CourseDataAdmin(admin.ModelAdmin):
+    list_display = ["id"]
