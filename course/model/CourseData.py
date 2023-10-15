@@ -1,5 +1,15 @@
 from django.db import models
 
+LOCATION = [
+    ("1", "Gijang"),
+    ("2", "Dongnae"),
+    ("3", "Haeundae"),
+    ("4", "Seomyeon"),
+    ("5", "Gwangan"),
+    ("6", "Sasang/Gangseo"),
+    ("7", "Yeongdo"),
+]
+
 TRAVELING_COMPANION_STYLE = [
     ("1", "Infant"),
     ("2", "Child"),
@@ -49,7 +59,7 @@ class CourseData(models.Model):
 
     days = models.IntegerField(null=True)
 
-    location = models.CharField(max_length=50)
+    location = models.CharField(max_length=50, choices=LOCATION, default=LOCATION[0])
 
     detail = models.JSONField()
 
