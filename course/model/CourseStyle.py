@@ -50,3 +50,6 @@ class CourseStyle(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     place = models.JSONField(null=True)  # 사용자가 가고자 하는 장소 list
+
+    class Meta:
+        db_table = "course_styles"
