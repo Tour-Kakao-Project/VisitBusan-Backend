@@ -34,7 +34,9 @@ def create_course_result(course_style):
     end_date = course_style.end_date
 
     # course style step 4
-    place = course_style.place
+    place = [
+        Busan_Location.get_busan_location(ele["name"]) for ele in course_style.place
+    ]
 
     # TBD algorithm
     ## Test 데이터
@@ -84,8 +86,8 @@ def create_course_result(course_style):
         check_date += timedelta(days=1)
 
     course_result = {
-        "departure": place[0]["name"],
-        "destination": place[-1]["name"],
+        "departure": place[0].string_key,
+        "destination": place[-1].string_key,
         "total_people_cnt": total_people_cnt,
         "course_detail": course_detail,
     }
