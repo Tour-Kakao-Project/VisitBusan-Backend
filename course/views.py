@@ -56,6 +56,8 @@ class CourseResult(APIView):
                 course_detail=course_result["course_detail"],
             )
 
+            course.save()
+
             return Response(
                 {"data": CourseSerializers(course).data}, status=status.HTTP_200_OK
             )
@@ -82,3 +84,15 @@ def test_detail(request):
     location_url = location_result["url"]
     location_user_ratings_total = location_result["user_ratings_total"]
     return Response({"result": location_result}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_all_course(request):
+    member = request.user.member
+    course_list = Course.objects.all().filter(member=member)
+
+    return Response(
+        {"data": [CourseSerializers(course).data for course in course_list]},
+        status=status.HTTP_200_OK,
+    )
