@@ -15,6 +15,7 @@ from .service.index import *
 from .serializers import *
 
 from course.service.google_api.google_place_api import *
+from visit_busan.exception.Custom400Exception import Custom400Exception
 
 
 class CourseResult(APIView):
@@ -89,10 +90,18 @@ def test_detail(request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_all_course(request):
-    member = request.user.member
-    course_list = Course.objects.all().filter(member=member)
+    try:
+        member = request.user.member
+        course_list = Course.objects.all().filter(member=member)
 
-    return Response(
-        {"data": [CourseSerializers(course).data for course in course_list]},
-        status=status.HTTP_200_OK,
-    )
+        print(member.email)
+        print(len(course_list))
+
+        return Response(
+            {"data": [CourseSerializers(course).data for course in course_list]},
+            status=status.HTTP_200_OK,
+        )
+    except Custom400Exception as e:
+        raise e
+    except Exception as e:
+        print(e)
