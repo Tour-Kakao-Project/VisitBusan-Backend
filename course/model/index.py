@@ -1,2 +1,2 @@
-from course.model.CourseStyle import *
-from course.model.Course import *
+from course.model.CourseStyle import CourseStyle
+from course.model.Course import Course
