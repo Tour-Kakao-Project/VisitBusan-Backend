@@ -23,6 +23,7 @@ class CourseResult(APIView):
     @permission_classes([AllowAny])
     def find_course_result(request):
         try:
+            print(request.data)
             member = request.user.member
             start_date = datetime.datetime.strptime(
                 request.data["start_date"], "%Y-%m-%d"
@@ -62,6 +63,8 @@ class CourseResult(APIView):
             return Response(
                 {"data": CourseSerializers(course).data}, status=status.HTTP_200_OK
             )
+        except Custom400Exception as e:
+            raise e
         except Exception as e:
             print(e)
 

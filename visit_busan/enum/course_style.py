@@ -1,8 +1,8 @@
 from enum import Enum
 
 
-class Traveling_Company(Enum):
-    INFANT = ("Infannt", "1")
+class Traveling_Companion(Enum):
+    INFANT = ("Infant", "1")
     CHILD = ("Child", "2")
     TEENS = ("Teens", "3")
     E20S = ("20s", "4")
@@ -19,6 +19,11 @@ class Traveling_Company(Enum):
     def __str__(self):
         return self.error_code
 
+    def get_traveling_company(string_key):
+        for ele in list(Traveling_Companion):
+            if ele.string_key == string_key:
+                return ele
+
 
 class Schedule_Style(Enum):
     DILIGENTLY = ("Diligently", "1")
@@ -30,6 +35,11 @@ class Schedule_Style(Enum):
 
     def __str__(self):
         return self.error_code
+
+    def get_schedule_style(string_key):
+        for ele in list(Schedule_Style):
+            if ele.string_key == string_key:
+                return ele
 
 
 class Activity_Style(Enum):
@@ -44,6 +54,11 @@ class Activity_Style(Enum):
     def __str__(self):
         return self.error_code
 
+    def get_activity_style(string_key):
+        for ele in list(Activity_Style):
+            if ele.string_key == string_key:
+                return ele
+
 
 class Attraction_Style(Enum):
     URBAN = ("Urban", "1")
@@ -56,9 +71,14 @@ class Attraction_Style(Enum):
     def __str__(self):
         return self.error_code
 
+    def get_attraction_style(string_key):
+        for ele in list(Attraction_Style):
+            if ele.string_key == string_key:
+                return ele
+
 
 class Travel_KeyWord(Enum):
-    K_POP = ("K-pop", "1")
+    K_POP = ("K-POP", "1")
     With_FAMILY = ("With Family", "2")
     TRADITIONAL = ("Traditional", "3")
     WITH_FRIEND = ("With friend", "4")
@@ -71,3 +91,8 @@ class Travel_KeyWord(Enum):
 
     def __str__(self):
         return self.error_code
+
+    def get_travel_keyword(string_key):
+        for ele in list(Travel_KeyWord):
+            if ele.string_key == string_key:
+                return ele

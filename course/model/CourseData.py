@@ -1,7 +1,7 @@
 from django.db import models
 
 TRAVELING_COMPANION_STYLE = [
-    ("1", "Infannt"),
+    ("1", "Infant"),
     ("2", "Child"),
     ("3", "Teens"),
     ("4", "20s"),
@@ -39,15 +39,13 @@ TRAVEL_KEYWORD = [
 
 
 class CourseData(models.Model):
-    traveling_companion = models.CharField(
-        max_length=50, choices=TRAVELING_COMPANION_STYLE
-    )
+    traveling_companion = models.CharField(max_length=100)  # / 로 구분
     is_disablity = models.BooleanField()
 
     schedule = models.CharField(max_length=50, choices=SCHEDULE_STYLE)
     activity = models.CharField(max_length=50, choices=ACTIVITY_STYLE)
     attraction = models.CharField(max_length=50, choices=ATTRACTION_STYLE)
-    keyword = models.CharField(max_length=50, choices=TRAVEL_KEYWORD)
+    keyword = models.CharField(max_length=100)  # / 로 구분
 
     days = models.IntegerField(null=True)
 
