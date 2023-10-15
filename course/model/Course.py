@@ -8,14 +8,18 @@ class Course(models.Model):
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
-    course_style = models.ForeignKey(CourseStyle, on_delete=models.CASCADE)
+    course_style = models.OneToOneField(CourseStyle, on_delete=models.CASCADE)
     member = models.ForeignKey(Member, on_delete=models.CASCADE, null=True)
+
     start_date = models.DateField()
     end_date = models.DateField()
     departure = models.CharField(max_length=50)  # 출발지
     destination = models.CharField(max_length=50)  # 도착지
     total_people_cnt = models.IntegerField(null=True)
     course_detail = models.JSONField()
+
+    class Meta:
+        db_table = "courses"
 
     """
     [
