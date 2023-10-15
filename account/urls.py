@@ -22,4 +22,7 @@ urlpatterns = [
     path("authorize/reissue", views.reissue_authentication_code),
     # test
     path("sign-up/email", views.show_mail_templates),
+    # account
+    path("member/find-passwd", views.Visit_Busan_Member.find_passwd),
+    path("member", views.MemberView.as_view()),
 ]

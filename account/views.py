@@ -18,12 +18,15 @@ from visit_busan.exception.Custom400Exception import *
 from visit_busan.utils.email_util import (
     send_sign_up_email,
     send_sign_up_email_with_templete,
+    send_passwd,
+    send_passwd_with_templete,
 )
 from account.cache.authorized_code import *
 from account.service.google_api.google_oauth_api import (
     get_google_user_info_from_access_token,
     get_google_user_info_from_id_token,
 )
+from account.serializers import *
 
 
 class KakaoLogin(APIView):
@@ -83,7 +86,6 @@ class KakaoLogin(APIView):
     @api_view(["POST"])
     @permission_classes([AllowAny])
     def kakao_login(request):
-        print("kakao login")
         print(requests.data)
         try:
             kakao_access_token = request.data["kakao_access_token"]
@@ -106,8 +108,10 @@ class KakaoLogin(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-        except:
-            pass
+        except Custom400Exception as e:
+            raise e
+        except Exception as e:
+            print(e)
 
 
 def get_tokens_for_user(user):
@@ -182,49 +186,60 @@ class Visit_Busan_Login(APIView):
             raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
 
         # 3. Save
-        user, member = save_member(email, first_name, last_name, 1)
+        user, member = save_member(email, first_name, last_name, 1, passwd)
 
         # 4. Send email
         send_sign_up_email_with_templete(member.email)
 
         return Response({"email": member.email}, status=status.HTTP_200_OK)
 
-    @api_view(["GET"])
+    @api_view(["POST"])
     @permission_classes([AllowAny])
     def visit_busan_login(request):
-        email = request.data["email"]
-        passwd = request.data["password"]
+        try:
+            email = request.data["email"]
+            passwd = request.data["password"]
 
-        # 1. Check the email
-        member = Member.objects.filter(email=str(email))
-        if member.exists():
-            login_service = member.get().oauth_provider
-            if login_service != "1":
-                raise Custom400Exception(ErrorCode_400.ALREADY_SIGN_IN)
+            print(request.data)
 
-        # 2. Check the password
-        if not check_passwd_rule(passwd):
-            raise Custom400Exception(ErrorCode_400.INVAILD_PASSED)
+            # 1. Check the email
+            member = Member.objects.filter(email=str(email))
+            if member.exists():
+                login_service = member.get().oauth_provider
+                if login_service != "1":
+                    raise Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+            else:
+                raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
 
-        # + Check is_authoirzed
-        member = member.get()
-        # if not member.is_authorized:
-        #     return Response(
-        #         {"email": member.email, "is_authorized": False},
-        #         status=status.HTTP_401_UNAUTHORIZED,
-        #     )
+            # 2. Check the password
+            if not check_passwd_rule(passwd):
+                raise Custom400Exception(ErrorCode_400.INVAILD_PASSWD)
 
-        # 3. Get backend token
-        user = User.objects.get(username=str(email))
-        jwt_token = get_tokens_for_user(user)
+            if passwd != member.get().passwd:
+                raise Custom400Exception(ErrorCode_400.WRONG_PASSWD)
+            # + Check is_authoirzed
+            member = member.get()
+            # if not member.is_authorized:
+            #     return Response(
+            #         {"email": member.email, "is_authorized": False},
+            #         status=status.HTTP_401_UNAUTHORIZED,
+            #     )
 
-        # 4. Save refresh token
-        member.refresh_token = jwt_token["refresh_token"]
-        member.save()
+            # 3. Get backend token
+            user = User.objects.get(username=str(email))
+            jwt_token = get_tokens_for_user(user)
+            # 4. Save refresh token
+            member.refresh_token = jwt_token["refresh_token"]
+            member.save()
 
-        return Response(
-            {"email": member.email, "jwt_token": jwt_token}, status=status.HTTP_200_OK
-        )
+            return Response(
+                {"email": member.email, "jwt_token": jwt_token},
+                status=status.HTTP_200_OK,
+            )
+        except Custom400Exception as e:
+            raise e
+        except Exception as e:
+            print(e)
 
 
 class GoogleLogin:
@@ -323,7 +338,7 @@ class GoogleLogin:
             )
 
 
-def save_member(email, first_name, last_name, oauth_provider_num):
+def save_member(email, first_name, last_name, oauth_provider_num, passwd):
     user = User.objects.create(username=str(email))
     user.save()
 
@@ -334,6 +349,7 @@ def save_member(email, first_name, last_name, oauth_provider_num):
         last_name=last_name,
         oauth_provider=oauth_provider_num,
         is_authorized=False,
+        passwd=passwd,
     )
     member.save()
     return user, member
@@ -385,32 +401,35 @@ def check_duplicated_email(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def check_authentication_code(request):
-    email = request.data["email"]
-    code = request.data["authentication_code"]
+    try:
+        print(request.data)
+        email = request.data["email"]
+        code = request.data["authentication_code"]
 
-    member = find_member_by_email(email)
+        member = find_member_by_email(email)
 
-    result = authorize_code(code, email)
-    if result == True:
-        member.is_authorized = 1
-        member.save()
+        result = authorize_code(code, email)
+        if result == True:
+            member.is_authorized = 1
+            member.save()
 
-        return Response(
-            {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
-        )
+            return Response(
+                {"email": member.email, "result": "Success"}, status=status.HTTP_200_OK
+            )
+    except Custom400Exception as e:
+        raise e
+    except Exception as e:
+        print(e)
 
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def reissue_authentication_code(request):
     email = request.data["email"]
-    authorized_code = random.randrange(1000, 10000)
 
-    save_authorized_code(authorized_code, email)
+    send_sign_up_email_with_templete(email)
 
-    return Response(
-        {"email": authorized_code, "result": "Success"}, status=status.HTTP_200_OK
-    )
+    return Response({"email": email, "result": "Success"}, status=status.HTTP_200_OK)
 
 
 def find_member_by_email(email):
@@ -426,6 +445,57 @@ def find_member_by_email(email):
 def show_mail_templates(requests):
     try:
         context = {"email": "lchy0413@gmail.com", "authorized_code": 1234}
-        return render(requests, "account/mail_template_b.html", context=context)
+        return render(requests, "account/email_authentication_b.html", context=context)
+    except Custom400Exception as e:
+        raise e
     except Exception as e:
-        e
+        print(e)
+
+
+class Visit_Busan_Member(APIView):
+    @api_view(["POST"])
+    @permission_classes([AllowAny])
+    def find_passwd(request):
+        try:
+            print(request.data)
+            email = request.data["email"]
+            member = Member.objects.filter(email=str(email))
+            if member.exists():
+                member = member.get()
+                if member.oauth_provider != "1":
+                    Custom400Exception(ErrorCode_400.OAUTH_MEMBER_REQUEST)
+                else:
+                    send_passwd_with_templete(email, member.passwd)
+                    return Response(
+                        {"email": email, "result": "Success"},
+                        status=status.HTTP_200_OK,
+                    )
+            else:
+                raise Custom400Exception(ErrorCode_400.NOT_EXIST_EMAIL)
+        except Custom400Exception as e:
+            raise e
+        except Exception as e:
+            print(e)
+
+
+class MemberView(APIView):
+    # Send member info
+    def get(self, request):
+        member = request.user.member
+
+        return Response(
+            MemberSerializers(member).data,
+            status=status.HTTP_200_OK,
+        )
+
+    # Remove member data(user, member, course)
+    def delete(self, request):
+        member = request.user.member
+        email = member.email
+        user = member.user
+
+        user.delete()
+        return Response(
+            {"email": email, "result": "Success"},
+            status=status.HTTP_200_OK,
+        )
