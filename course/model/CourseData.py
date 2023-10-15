@@ -50,11 +50,11 @@ TRAVEL_KEYWORD = [
 
 class CourseData(models.Model):
     traveling_companion = models.CharField(max_length=100)  # / 로 구분
-    is_disablity = models.BooleanField()
+    is_disablity = models.BooleanField(null=True)
 
-    schedule = models.CharField(max_length=50, choices=SCHEDULE_STYLE)
-    activity = models.CharField(max_length=50, choices=ACTIVITY_STYLE)
-    attraction = models.CharField(max_length=50, choices=ATTRACTION_STYLE)
+    schedule = models.CharField(max_length=50, choices=SCHEDULE_STYLE, null=True)
+    activity = models.CharField(max_length=50, choices=ACTIVITY_STYLE, null=True)
+    attraction = models.CharField(max_length=50, choices=ATTRACTION_STYLE, null=True)
     keyword = models.CharField(max_length=100)  # / 로 구분
 
     days = models.IntegerField(null=True)
