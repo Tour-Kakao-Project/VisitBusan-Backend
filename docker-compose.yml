@@ -11,7 +11,7 @@ services:
       - .:/app
     logging:
       driver: 'json-file'
-      option:
+      options:
         max-size: '100k'
         max-file: '10'
 volumes:
