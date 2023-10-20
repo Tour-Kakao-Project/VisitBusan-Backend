@@ -6,18 +6,37 @@ from course.service.kakao_api.kakao_location_api import *
 
 
 def create_course_result(course_style):
-    ages = course_style.choice_data["ages"]
-    disablity = course_style.choice_data["disablity"]
+    # course style step 1
+    traveling_companion = [
+        Traveling_Companion.get_traveling_company(ele["name"])
+        for ele in course_style.choice_data["traveling_companion"]
+    ]
+    is_disablity = True if course_style.choice_data["disablity"] == "yes" else False
     total_people_cnt = course_style.choice_data["total_people_cnt"]
-    schedule_style = course_style.choice_data["schedule"]
-    activity_style = course_style.choice_data["activity"]
-    food_style = course_style.choice_data["food"]
-    accommodation_style = course_style.choice_data["accommodation"]
-    attration_style = course_style.choice_data["attration"]
-    keyword = course_style.choice_data["keyword"]
+
+    # course style step 2
+    schedule_style = Schedule_Style.get_schedule_style(
+        course_style.choice_data["schedule"]
+    )
+    activity_style = Activity_Style.get_activity_style(
+        course_style.choice_data["activity"]
+    )
+    attration_style = Attraction_Style.get_attraction_style(
+        course_style.choice_data["attration"]
+    )
+    keyword = [
+        Travel_KeyWord.get_travel_keyword(ele["name"])
+        for ele in course_style.choice_data["keyword"]
+    ]
+
+    # course style step 3
     start_date = course_style.start_date
     end_date = course_style.end_date
-    place = course_style.place
+
+    # course style step 4
+    place = [
+        Busan_Location.get_busan_location(ele["name"]) for ele in course_style.place
+    ]
 
     # TBD algorithm
     ## Test 데이터
@@ -67,8 +86,8 @@ def create_course_result(course_style):
         check_date += timedelta(days=1)
 
     course_result = {
-        "departure": place[0]["name"],
-        "destination": place[-1]["name"],
+        "departure": place[0].string_key,
+        "destination": place[-1].string_key,
         "total_people_cnt": total_people_cnt,
         "course_detail": course_detail,
     }

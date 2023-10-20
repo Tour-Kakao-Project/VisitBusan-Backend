@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 OAUTH_PROVIDER_CHOICES = [
     ("1", "NONE"),
     ("2", "KAKAO"),
@@ -14,6 +13,8 @@ class Member(models.Model):
     updated_at = models.DateField(auto_now=True, null=True)
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, default=None)
+    # course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True)
+
     email = models.EmailField(max_length=300)  # 이메일
     passwd = models.CharField(max_length=50, blank=True)
     first_name = models.CharField(max_length=30, blank=True)  # 이름: 이름
